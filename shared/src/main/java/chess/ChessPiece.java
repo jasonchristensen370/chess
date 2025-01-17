@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -10,7 +11,26 @@ import java.util.Collection;
  */
 public class ChessPiece {
 
+    private ChessGame.TeamColor pieceColor;
+    private ChessPiece.PieceType type;
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+        this.pieceColor = pieceColor;
+        this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return pieceColor == that.pieceColor && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type);
     }
 
     /**
@@ -29,14 +49,56 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return pieceColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return type;
+    }
+
+    public String toString() {
+        switch (pieceColor) {
+            case WHITE:
+                switch (type) {
+                    case KING:
+                        return "K";
+                    case QUEEN:
+                        return "Q";
+                    case BISHOP:
+                        return "B";
+                    case KNIGHT:
+                        return "N";
+                    case ROOK:
+                        return "R";
+                    case PAWN:
+                        return "P";
+                    default:
+                        return "";
+                }
+            case BLACK:
+                switch (type) {
+                    case KING:
+                        return "k";
+                    case QUEEN:
+                        return "q";
+                    case BISHOP:
+                        return "b";
+                    case KNIGHT:
+                        return "n";
+                    case ROOK:
+                        return "r";
+                    case PAWN:
+                        return "p";
+                    default:
+                        return "";
+                }
+            default:
+                return "Error";
+        }
+
     }
 
     /**
