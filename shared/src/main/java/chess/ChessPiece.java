@@ -109,6 +109,27 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        switch (board.getPiece(myPosition).getPieceType()) {
+            case KING:
+                PieceMovesCalculator calc1 = new KingMovesCalculator();
+                return calc1.pieceMoves(board, myPosition);
+            case QUEEN:
+                PieceMovesCalculator calc2 = new QueenMovesCalculator();
+                return calc2.pieceMoves(board, myPosition);
+            case BISHOP:
+                PieceMovesCalculator calc3 = new BishopMovesCalculator();
+                return calc3.pieceMoves(board, myPosition);
+            case KNIGHT:
+                PieceMovesCalculator calc4 = new KnightMovesCalculator();
+                return calc4.pieceMoves(board, myPosition);
+            case ROOK:
+                PieceMovesCalculator calc5 = new RookMovesCalculator();
+                return calc5.pieceMoves(board, myPosition);
+            case PAWN:
+                PieceMovesCalculator calc6 = new PawnMovesCalculator();
+                return calc6.pieceMoves(board, myPosition);
+            default:
+                return null;
+        }
     }
 }
