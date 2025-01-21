@@ -60,44 +60,24 @@ public class ChessPiece {
     }
 
     public String toString() {
-        switch (pieceColor) {
-            case WHITE:
-                switch (type) {
-                    case KING:
-                        return "K";
-                    case QUEEN:
-                        return "Q";
-                    case BISHOP:
-                        return "B";
-                    case KNIGHT:
-                        return "N";
-                    case ROOK:
-                        return "R";
-                    case PAWN:
-                        return "P";
-                    default:
-                        return "";
-                }
-            case BLACK:
-                switch (type) {
-                    case KING:
-                        return "k";
-                    case QUEEN:
-                        return "q";
-                    case BISHOP:
-                        return "b";
-                    case KNIGHT:
-                        return "n";
-                    case ROOK:
-                        return "r";
-                    case PAWN:
-                        return "p";
-                    default:
-                        return "";
-                }
-            default:
-                return "Error";
-        }
+        return switch (pieceColor) {
+            case WHITE -> switch (type) {
+                    case KING -> "K";
+                    case QUEEN -> "Q";
+                    case BISHOP -> "B";
+                    case KNIGHT -> "N";
+                    case ROOK -> "R";
+                    case PAWN -> "P";
+                };
+            case BLACK -> switch (type) {
+                    case KING -> "k";
+                    case QUEEN -> "q";
+                    case BISHOP -> "b";
+                    case KNIGHT -> "n";
+                    case ROOK -> "r";
+                    case PAWN -> "p";
+                };
+        };
 
     }
 
@@ -108,28 +88,15 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        switch (board.getPiece(myPosition).getPieceType()) {
-            case KING:
-                PieceMovesCalculator calc1 = new KingMovesCalculator();
-                return calc1.pieceMoves(board, myPosition);
-            case QUEEN:
-                PieceMovesCalculator calc2 = new QueenMovesCalculator();
-                return calc2.pieceMoves(board, myPosition);
-            case BISHOP:
-                PieceMovesCalculator calc3 = new BishopMovesCalculator();
-                return calc3.pieceMoves(board, myPosition);
-            case KNIGHT:
-                PieceMovesCalculator calc4 = new KnightMovesCalculator();
-                return calc4.pieceMoves(board, myPosition);
-            case ROOK:
-                PieceMovesCalculator calc5 = new RookMovesCalculator();
-                return calc5.pieceMoves(board, myPosition);
-            case PAWN:
-                PieceMovesCalculator calc6 = new PawnMovesCalculator();
-                return calc6.pieceMoves(board, myPosition);
-            default:
-                return null;
-        }
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
+        PieceMovesCalculator calc = switch (getPieceType()) {
+            case KING -> new KingMovesCalculator();
+            case QUEEN -> new QueenMovesCalculator();
+            case BISHOP -> new BishopMovesCalculator();
+            case KNIGHT -> new KnightMovesCalculator();
+            case ROOK -> new RookMovesCalculator();
+            case PAWN -> new PawnMovesCalculator();
+        };
+        return calc.pieceMoves(board, position);
     }
 }
