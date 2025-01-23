@@ -67,36 +67,3 @@ public class PawnMovesCalculator  implements PieceMovesCalculator {
         return validMoves;
     }
 }
-
-
-/*
-int count = 0;
-        for (ChessPosition test_move : test_moves_normal) {
-            int test_row = test_move.getRow();
-            int test_col = test_move.getColumn();
-            if (count == 0 && ((start_row != 2 && my_color == ChessGame.TeamColor.WHITE) || (start_row != 7 && my_color == ChessGame.TeamColor.BLACK))) {
-                continue;
-            }
-            if (test_row <= 8 && test_col <= 8 && test_row >= 1 && test_col >= 1 && board.getPiece(test_move) == null) {
-                if (test_row == 1 || test_row == 8) {
-                    promo_piece = ChessPiece.PieceType.QUEEN;
-                } else {
-                    promo_piece = null;
-                }
-                validMoves.add(new ChessMove(position, test_move, promo_piece));
-            }
-            count++;
-        }
-        for (ChessPosition test_move : test_moves_attack) {
-            int test_row = test_move.getRow();
-            int test_col = test_move.getColumn();
-            if (test_row <= 8 && test_col <= 8 && test_row >= 1 && test_col >= 1 && board.getPiece(test_move) != null && board.getPiece(test_move).getTeamColor() != my_color) {
-                if (test_row == 1 || test_row == 8) {
-                    promo_piece = ChessPiece.PieceType.QUEEN;
-                } else {
-                    promo_piece = null;
-                }
-                validMoves.add(new ChessMove(position, test_move, promo_piece));
-            }
-        }
- */

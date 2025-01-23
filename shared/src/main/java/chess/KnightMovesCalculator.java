@@ -20,9 +20,7 @@ public class KnightMovesCalculator  implements PieceMovesCalculator{
                 new ChessPosition(start_row-1, start_column+2)};
 
         for (ChessPosition test_move : test_moves) {
-            int test_row = test_move.getRow();
-            int test_col = test_move.getColumn();
-            if (test_row <= 8 && test_col <= 8 && test_row >= 1 && test_col >= 1 && (board.getPiece(test_move) == null || board.getPiece(test_move).getTeamColor() != my_color)) {
+            if (MoveHelper.isValidBoardSpace(test_move) && MoveHelper.canMoveAndCapture(board, test_move, my_color)) {
                 validMoves.add(new ChessMove(position, test_move, null));
             }
         }
