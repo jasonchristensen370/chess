@@ -61,21 +61,21 @@ public class ChessPiece {
 
     public String toString() {
         return switch (pieceColor) {
-            case WHITE -> switch (type) {
-                    case KING -> "K";
-                    case QUEEN -> "Q";
-                    case BISHOP -> "B";
-                    case KNIGHT -> "N";
-                    case ROOK -> "R";
-                    case PAWN -> "P";
-                };
             case BLACK -> switch (type) {
-                    case KING -> "k";
-                    case QUEEN -> "q";
-                    case BISHOP -> "b";
-                    case KNIGHT -> "n";
-                    case ROOK -> "r";
-                    case PAWN -> "p";
+                    case KING -> "♔";
+                    case QUEEN -> "♕";
+                    case BISHOP -> "♗";
+                    case KNIGHT -> "♘";
+                    case ROOK -> "♖";
+                    case PAWN -> "♙";
+                };
+            case WHITE -> switch (type) {
+                    case KING -> "♚";
+                    case QUEEN -> "♛";
+                    case BISHOP -> "♝";
+                    case KNIGHT -> "♞";
+                    case ROOK -> "♜";
+                    case PAWN -> "♟";
                 };
         };
 
