@@ -70,6 +70,7 @@ public class ChessGame {
         if (piece == null) {
             return null;
         }
+        ChessGame.TeamColor turn = piece.getTeamColor();
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> validMoves = new ArrayList<>();
         // Loop through all possible moves and make sure it doesn't put the king in check.
@@ -82,7 +83,7 @@ public class ChessGame {
             testBoard.addPiece(move.getStartPosition(), null);
             testGame.setBoard(testBoard);
             // If not in check, add it to validMoves
-            if (testGame.isInCheck(teamTurn)) {
+            if (testGame.isInCheck(turn)) {
                 continue;
             }
             validMoves.add(move);
@@ -104,7 +105,7 @@ public class ChessGame {
 
         Collection<ChessMove> validMoves = validMoves(startPosition);
 
-        if (validMoves != null && validMoves.contains(move)) {
+        if (validMoves != null && validMoves.contains(move) && piece.getTeamColor() == teamTurn) {
             board.addPiece(endPosition, piece);
             board.addPiece(startPosition, null);
             teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
@@ -148,9 +149,10 @@ public class ChessGame {
         for (ChessMove move : board.getPiece(kingPosition).pieceMoves(board, kingPosition)) {
             ChessGame testGame = new ChessGame();
             ChessBoard testBoard = board.clone();
+            testGame.setBoard(testBoard);
             testBoard.addPiece(move.getEndPosition(), testBoard.getPiece(kingPosition));
             testBoard.addPiece(move.getStartPosition(), null);
-            if (!testGame.isInCheck(teamTurn)) {
+            if (!testGame.isInCheck(teamColor)) {
                 return false;
             }
         }
