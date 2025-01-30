@@ -37,7 +37,16 @@ public class ChessBoard implements Cloneable {
         try {
             ChessBoard clone = (ChessBoard) super.clone();
             clone.board = new ChessPiece[8][8];
-            System.arraycopy(board, 0, clone.board, 0, 8);
+            for (int r=1; r<=8; r++) {
+                for (int c=1; c<=8; c++) {
+                    ChessPosition position = new ChessPosition(r, c);
+                    if (getPiece(position) == null) {
+                        continue;
+                    }
+                    ChessPiece piece = new ChessPiece(getPiece(position).getTeamColor(), getPiece(position).getPieceType());
+                    clone.addPiece(position, piece);
+                }
+            }
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
