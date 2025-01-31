@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
+import static java.lang.Math.abs;
+
 /**
  * For a class that can manage a chess game, making moves on a board
  * <p>
@@ -70,6 +72,7 @@ public class ChessGame {
         if (piece == null) {
             return null;
         }
+        ChessPiece.PieceType pieceType = piece.getPieceType();
         ChessGame.TeamColor turn = piece.getTeamColor();
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> validMoves = new ArrayList<>();
@@ -78,8 +81,9 @@ public class ChessGame {
             // Clone the board
             ChessGame testGame = new ChessGame();
             ChessBoard testBoard = board.clone();
+            ChessPiece testPiece = testBoard.getPiece(startPosition);
             // Make the move
-            testBoard.addPiece(move.getEndPosition(), piece);
+            testBoard.addPiece(move.getEndPosition(), testPiece);
             testBoard.addPiece(move.getStartPosition(), null);
             testGame.setBoard(testBoard);
             // If not in check, add it to validMoves
@@ -88,8 +92,62 @@ public class ChessGame {
             }
             validMoves.add(move);
         }
+        // Castling Logic for King moves
+        if (pieceType == ChessPiece.PieceType.KING) {
+            int row = (turn == TeamColor.WHITE) ? 1 : 8;
+            if (canCastle(turn, -1)) {
+                validMoves.add(new ChessMove(startPosition, new ChessPosition(row,3), null));
+            }
+            if (canCastle(turn, 1)) {
+                validMoves.add(new ChessMove(startPosition, new ChessPosition(row,7), null));
+            }
+        }
         return validMoves;
     }
+
+    private boolean canCastle(TeamColor teamColor, int direction) {
+        int row = (teamColor == TeamColor.WHITE) ? 1 : 8;
+        ChessPosition startPosition = new ChessPosition(row,5);
+        ChessPiece kingPiece = board.getPiece(startPosition);
+        int rookCol = (direction == -1) ? 1 : 8;
+        ChessPiece rook = board.getPiece(new ChessPosition(row, rookCol));
+        if (kingPiece == null || rook == null) {
+            return false;
+        } else if (kingPiece.getPieceType() != ChessPiece.PieceType.KING || rook.getPieceType() != ChessPiece.PieceType.ROOK) {
+            return false;
+        } else if (kingPiece.hasMoved) {
+            return false;
+        }
+        // Check empty spaces to the left
+        int[] colParams = switch (direction) {
+            case -1 -> new int[]{2, 4};
+            case 1 -> new int[]{6, 7};
+            default -> throw new IllegalArgumentException("Invalid direction: " + direction);
+        };
+        boolean canCastle = true;
+        for (int col = colParams[0]; col <= colParams[1]; col++) {
+            ChessPosition testPosition = new ChessPosition(row, col);
+            if (board.getPiece(testPosition) != null || rook.hasMoved) {
+                canCastle = false;
+                break;
+            } else {
+                // Look for check restrictions
+                ChessGame testGame = new ChessGame();
+                ChessBoard testBoard = board.clone();
+                ChessPiece testPiece = testBoard.getPiece(startPosition);
+                testBoard.addPiece(testPosition, testPiece);
+                testBoard.addPiece(startPosition, null);
+                testGame.setBoard(testBoard);
+                // If in check, can't castle
+                if (testGame.isInCheck(teamColor)) {
+                    canCastle = false;
+                }
+            }
+        }
+        return canCastle;
+    }
+
+
 
     /**
      * Makes a move in a chess game
@@ -106,8 +164,26 @@ public class ChessGame {
         Collection<ChessMove> validMoves = validMoves(startPosition);
 
         if (validMoves != null && validMoves.contains(move) && piece.getTeamColor() == teamTurn) {
+            int colDistance = endPosition.getColumn() - startPosition.getColumn();
+            if (piece.getPieceType() == ChessPiece.PieceType.KING && abs(colDistance) == 2) {
+                // We're castling, move the rook
+                ChessPosition rookStartPosition;
+                ChessPosition rookEndPosition;
+                if (colDistance < 0) {
+                    // It's to the left
+                    rookStartPosition = new ChessPosition(startPosition.getRow(), 1);
+                    rookEndPosition = new ChessPosition(endPosition.getRow(), 4);
+                } else {
+                    // It's to the right
+                    rookStartPosition = new ChessPosition(startPosition.getRow(), 8);
+                    rookEndPosition = new ChessPosition(endPosition.getRow(), 6);
+                }
+                board.addPiece(rookEndPosition, board.getPiece(rookStartPosition));
+                board.addPiece(rookStartPosition, null);
+            }
             board.addPiece(endPosition, piece);
             board.addPiece(startPosition, null);
+            piece.hasMoved = true;
             teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
         } else {
             throw new InvalidMoveException("Invalid move: " + move);
@@ -145,7 +221,6 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-//        ChessPosition kingPosition = board.findKing(teamColor);
         // Loop through all piece moves for teamColor
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
@@ -165,10 +240,7 @@ public class ChessGame {
                 }
             }
         }
-
-
         return true;
-//        throw new RuntimeException("Not implemented");
     }
 
     /**
@@ -194,7 +266,6 @@ public class ChessGame {
         }
         Collection<ChessMove> kingMoves = validMoves(kingPosition);
         return (kingMoves == null || kingMoves.isEmpty()) && !isInCheck(teamColor);
-//        throw new RuntimeException("Not implemented");
     }
 
     /**
