@@ -16,6 +16,7 @@ public class ChessGame {
 
     private ChessBoard board = new ChessBoard();
     private TeamColor teamTurn;
+    private ChessPosition enPassantPosition;
 
     public ChessGame() {
         board.resetBoard();
@@ -102,6 +103,17 @@ public class ChessGame {
                 validMoves.add(new ChessMove(startPosition, new ChessPosition(row,7), null));
             }
         }
+        // En Passant Logic for Pawn moves
+        if (pieceType == ChessPiece.PieceType.PAWN && enPassantPosition != null) {
+            int targetRow = enPassantPosition.getRow();
+            int targetColumn = enPassantPosition.getColumn();
+            int startRow = startPosition.getRow();
+            int startColumn = startPosition.getColumn();
+            int direction = (turn == TeamColor.WHITE) ? 1 : -1;
+            if (abs(startColumn-targetColumn) == 1 && startRow == targetRow) {
+                validMoves.add(new ChessMove(startPosition, new ChessPosition(targetRow+direction, targetColumn), null));
+            }
+        }
         return validMoves;
     }
 
@@ -147,8 +159,6 @@ public class ChessGame {
         return canCastle;
     }
 
-
-
     /**
      * Makes a move in a chess game
      *
@@ -160,27 +170,41 @@ public class ChessGame {
         ChessPosition endPosition = move.getEndPosition();
         ChessPiece.PieceType promoPiece = move.getPromotionPiece();
         ChessPiece piece = (promoPiece != null) ? new ChessPiece(teamTurn, promoPiece) : board.getPiece(startPosition);
-
         Collection<ChessMove> validMoves = validMoves(startPosition);
-
+        // Check if the move is a valid move for the team whose turn it is
         if (validMoves != null && validMoves.contains(move) && piece.getTeamColor() == teamTurn) {
             int colDistance = endPosition.getColumn() - startPosition.getColumn();
+            int rowDistance = endPosition.getRow() - startPosition.getRow();
+            // Castling Move Logic
             if (piece.getPieceType() == ChessPiece.PieceType.KING && abs(colDistance) == 2) {
-                // We're castling, move the rook
                 ChessPosition rookStartPosition;
                 ChessPosition rookEndPosition;
                 if (colDistance < 0) {
-                    // It's to the left
+                    // Castling Queen-side
                     rookStartPosition = new ChessPosition(startPosition.getRow(), 1);
                     rookEndPosition = new ChessPosition(endPosition.getRow(), 4);
                 } else {
-                    // It's to the right
+                    // Castling King-side
                     rookStartPosition = new ChessPosition(startPosition.getRow(), 8);
                     rookEndPosition = new ChessPosition(endPosition.getRow(), 6);
                 }
                 board.addPiece(rookEndPosition, board.getPiece(rookStartPosition));
                 board.addPiece(rookStartPosition, null);
             }
+            // En Passant Move Logic
+            if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                if (abs(rowDistance) == 2) {
+                    enPassantPosition = endPosition;
+                } else {
+                    if (abs(colDistance) == 1 && abs(rowDistance) == 1 && board.getPiece(endPosition) == null) {
+                        // Pawn is capturing en passant, remove pawn to be captured
+                        board.addPiece(enPassantPosition, null);
+                    }
+                    // En passant not possible
+                    enPassantPosition = null;
+                }
+            }
+            // Move normally
             board.addPiece(endPosition, piece);
             board.addPiece(startPosition, null);
             piece.hasMoved = true;
