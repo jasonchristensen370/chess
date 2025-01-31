@@ -6,22 +6,22 @@ import java.util.Collection;
 public class KnightMovesCalculator  implements PieceMovesCalculator{
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         Collection<ChessMove> validMoves = new ArrayList<>();
-        int start_row = position.getRow();
-        int start_column = position.getColumn();
-        ChessGame.TeamColor my_color = board.getPiece(position).getTeamColor();
+        int startRow = position.getRow();
+        int startColumn = position.getColumn();
+        ChessGame.TeamColor myColor = board.getPiece(position).getTeamColor();
 
-        ChessPosition[] test_moves = {new ChessPosition(start_row+2, start_column-1),
-                new ChessPosition(start_row+2, start_column+1),
-                new ChessPosition(start_row-2, start_column-1),
-                new ChessPosition(start_row-2, start_column+1),
-                new ChessPosition(start_row+1, start_column-2),
-                new ChessPosition(start_row+1, start_column+2),
-                new ChessPosition(start_row-1, start_column-2),
-                new ChessPosition(start_row-1, start_column+2)};
+        ChessPosition[] testMoves = {new ChessPosition(startRow+2, startColumn-1),
+                new ChessPosition(startRow+2, startColumn+1),
+                new ChessPosition(startRow-2, startColumn-1),
+                new ChessPosition(startRow-2, startColumn+1),
+                new ChessPosition(startRow+1, startColumn-2),
+                new ChessPosition(startRow+1, startColumn+2),
+                new ChessPosition(startRow-1, startColumn-2),
+                new ChessPosition(startRow-1, startColumn+2)};
 
-        for (ChessPosition test_move : test_moves) {
-            if (MoveHelper.isValidBoardSpace(test_move) && MoveHelper.canMoveAndCapture(board, test_move, my_color)) {
-                validMoves.add(new ChessMove(position, test_move, null));
+        for (ChessPosition testMove : testMoves) {
+            if (MoveHelper.isValidBoardSpace(testMove) && MoveHelper.canMoveAndCapture(board, testMove, myColor)) {
+                validMoves.add(new ChessMove(position, testMove, null));
             }
         }
         return validMoves;

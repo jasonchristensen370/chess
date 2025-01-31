@@ -16,14 +16,14 @@ public abstract class MoveHelper {
     /* Adds a move to ValidMoves and returns true if a piece can continue, false if it hits a piece or the edge. */
     public static boolean addDirectionalMove(ChessBoard board, ChessPosition testMove, ChessGame.TeamColor myColor, ChessPosition position, Collection<ChessMove> validMoves) {
         int testRow = testMove.getRow();
-        int test_col = testMove.getColumn();
-        if (testRow <= 8 && test_col <= 8 && testRow >= 1 && test_col >= 1) {
+        int testCol = testMove.getColumn();
+        if (testRow <= 8 && testCol <= 8 && testRow >= 1 && testCol >= 1) {
             if (board.getPiece(testMove) == null) {
                 validMoves.add(new ChessMove(position, testMove, null));
             } else if (board.getPiece(testMove).getTeamColor() != myColor) {
                 validMoves.add(new ChessMove(position, testMove, null));
                 return false;
-            } else { /* Is my_color. Don't add and stop in this direction */
+            } else { /* Is myColor. Don't add and stop in this direction */
                 return false;
             }
             return true;
