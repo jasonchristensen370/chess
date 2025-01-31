@@ -226,11 +226,12 @@ public class ChessGame {
             for (int col = 1; col <= 8; col++) {
                 ChessPosition position = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(position);
-                if (piece != null && piece.getTeamColor() != teamColor) {
-                    for (ChessMove move : piece.pieceMoves(board, position)) {
-                        if (move.getEndPosition().equals(kingPosition)) {
-                            return true;
-                        }
+                if (piece == null || piece.getTeamColor() == teamColor) {
+                    continue;
+                }
+                for (ChessMove move : piece.pieceMoves(board, position)) {
+                    if (move.getEndPosition().equals(kingPosition)) {
+                        return true;
                     }
                 }
             }
@@ -250,18 +251,20 @@ public class ChessGame {
             for (int col = 1; col <= 8; col++) {
                 ChessPosition position = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(position);
-                if (piece != null && piece.getTeamColor() == teamColor) {
-                    for (ChessMove move : board.getPiece(position).pieceMoves(board, position)) {
-                        ChessGame testGame = new ChessGame();
-                        ChessBoard testBoard = board.clone();
-                        testGame.setBoard(testBoard);
-                        testBoard.addPiece(move.getEndPosition(), testBoard.getPiece(position));
-                        testBoard.addPiece(move.getStartPosition(), null);
-                        if (!testGame.isInCheck(teamColor)) {
-                            return false;
-                        }
+                if (piece == null || piece.getTeamColor() != teamColor) {
+                    continue;
+                }
+                for (ChessMove move : board.getPiece(position).pieceMoves(board, position)) {
+                    ChessGame testGame = new ChessGame();
+                    ChessBoard testBoard = board.clone();
+                    testGame.setBoard(testBoard);
+                    testBoard.addPiece(move.getEndPosition(), testBoard.getPiece(position));
+                    testBoard.addPiece(move.getStartPosition(), null);
+                    if (!testGame.isInCheck(teamColor)) {
+                        return false;
                     }
                 }
+
             }
         }
         return true;

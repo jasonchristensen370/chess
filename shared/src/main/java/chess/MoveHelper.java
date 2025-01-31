@@ -13,7 +13,9 @@ public abstract class MoveHelper {
         return (board.getPiece(testMove) == null || board.getPiece(testMove).getTeamColor() != myColor);
     }
 
-    public static void addPromotionPieces(ChessPosition startPosition, ChessPosition endPosition, Collection<ChessMove> validMoves) {
+    public static void addPromotionPieces(ChessPosition startPosition,
+                                          ChessPosition endPosition,
+                                          Collection<ChessMove> validMoves) {
         validMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.QUEEN));
         validMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.ROOK));
         validMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.KNIGHT));
@@ -21,7 +23,11 @@ public abstract class MoveHelper {
     }
 
     /* Adds a move to ValidMoves and returns true if a piece can continue, false if it hits a piece or the edge. */
-    public static boolean addDirectionalMove(ChessBoard board, ChessPosition testMove, ChessGame.TeamColor myColor, ChessPosition position, Collection<ChessMove> validMoves) {
+    public static boolean addDirectionalMove(ChessBoard board,
+                                             ChessPosition testMove,
+                                             ChessGame.TeamColor myColor,
+                                             ChessPosition position,
+                                             Collection<ChessMove> validMoves) {
         int testRow = testMove.getRow();
         int testCol = testMove.getColumn();
         if (testRow <= 8 && testCol <= 8 && testRow >= 1 && testCol >= 1) {

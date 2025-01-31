@@ -20,8 +20,7 @@ public class PawnMovesCalculator  implements PieceMovesCalculator {
         // For attack moves
         for (ChessPosition testMove : attackMoves) {
             int testRow = testMove.getRow();
-            int testCol = testMove.getColumn();
-            if (testRow <= 8 && testRow >= 1 && testCol <= 8 && testCol >= 1 && board.getPiece(testMove) != null && board.getPiece(testMove).getTeamColor() != myColor) {
+            if (MoveHelper.isValidBoardSpace(testMove) && board.getPiece(testMove) != null && board.getPiece(testMove).getTeamColor() != myColor) {
                 if (testRow == finalRow) {
                     MoveHelper.addPromotionPieces(myPosition, testMove, validMoves);
                 } else {
@@ -36,8 +35,7 @@ public class PawnMovesCalculator  implements PieceMovesCalculator {
         for (int i=1; i<=maxMoves; i++) {
             ChessPosition testMove = new ChessPosition(row+direction*i, col);
             int testRow = testMove.getRow();
-            int testCol = testMove.getColumn();
-            if (testRow <= 8 && testRow >= 1 && testCol <= 8 && testCol >= 1) {
+            if (MoveHelper.isValidBoardSpace(testMove)) {
                 if (board.getPiece(testMove) == null) {
                     if (testRow == finalRow) {
                         MoveHelper.addPromotionPieces(myPosition, testMove, validMoves);
