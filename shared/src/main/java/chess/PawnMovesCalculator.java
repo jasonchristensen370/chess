@@ -23,10 +23,7 @@ public class PawnMovesCalculator  implements PieceMovesCalculator {
             int testCol = testMove.getColumn();
             if (testRow <= 8 && testRow >= 1 && testCol <= 8 && testCol >= 1 && board.getPiece(testMove) != null && board.getPiece(testMove).getTeamColor() != myColor) {
                 if (testRow == finalRow) {
-                    validMoves.add(new ChessMove(myPosition, testMove, ChessPiece.PieceType.QUEEN));
-                    validMoves.add(new ChessMove(myPosition, testMove, ChessPiece.PieceType.ROOK));
-                    validMoves.add(new ChessMove(myPosition, testMove, ChessPiece.PieceType.KNIGHT));
-                    validMoves.add(new ChessMove(myPosition, testMove, ChessPiece.PieceType.BISHOP));
+                    MoveHelper.addPromotionPieces(myPosition, testMove, validMoves);
                 } else {
                     validMoves.add(new ChessMove(myPosition, testMove, null));
                 }
@@ -43,10 +40,7 @@ public class PawnMovesCalculator  implements PieceMovesCalculator {
             if (testRow <= 8 && testRow >= 1 && testCol <= 8 && testCol >= 1) {
                 if (board.getPiece(testMove) == null) {
                     if (testRow == finalRow) {
-                        validMoves.add(new ChessMove(myPosition, testMove, ChessPiece.PieceType.QUEEN));
-                        validMoves.add(new ChessMove(myPosition, testMove, ChessPiece.PieceType.ROOK));
-                        validMoves.add(new ChessMove(myPosition, testMove, ChessPiece.PieceType.KNIGHT));
-                        validMoves.add(new ChessMove(myPosition, testMove, ChessPiece.PieceType.BISHOP));
+                        MoveHelper.addPromotionPieces(myPosition, testMove, validMoves);
                     } else {
                         validMoves.add(new ChessMove(myPosition, testMove, null));
                     }
