@@ -7,13 +7,17 @@ import java.util.ArrayList;
 
 public class MemoryGameDAO implements GameDAO {
 
-    private ArrayList<GameData> database = new ArrayList<>();
+    private ArrayList<GameData> database;
+
+    public MemoryGameDAO() {
+        database = new ArrayList<>();
+    }
 
     public void clearGame() {
         database.clear();
     }
     public GameData createGame(String gameName) {
-        int gameID = database.size()+1;
+        int gameID = database.size();
         ChessGame game = new ChessGame();
         GameData newGameData = new GameData(gameID, "", "", gameName, game);
         database.add(newGameData);
@@ -25,7 +29,10 @@ public class MemoryGameDAO implements GameDAO {
     public ArrayList<GameData> listGames() {
         return database;
     }
-    public void updateGame(String playerColor, int gameID, String username) {
+    public void updateGame(String playerColor, int gameID, String username) throws DataAccessException {
+        if (database.get(gameID) == null) {
+            throw new DataAccessException("Invalid gameID");
+        }
         GameData gameInfo = database.get(gameID);
         String whiteUsername = gameInfo.whiteUsername();
         String blackUsername = gameInfo.blackUsername();
