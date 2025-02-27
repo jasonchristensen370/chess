@@ -5,9 +5,9 @@ import model.GameData;
 import java.util.ArrayList;
 
 public interface GameDAO {
-    public void clear();
-    public GameData createGame();
-    public GameData getGame();
-    public ArrayList<GameData> listGames();
-    public void updateGame();
+    void clearGame();
+    GameData createGame(String gameName);
+    GameData getGame(int gameID);
+    ArrayList<GameData> listGames();
+    void updateGame(String playerColor, int gameID, String Username);
 }
