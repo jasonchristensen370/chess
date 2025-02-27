@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class MemoryAuthDAO implements AuthDAO {
 
-    private Map<String, AuthData> database;
+    private final Map<String, AuthData> database;
 
     public MemoryAuthDAO() {
         database = new HashMap<>();

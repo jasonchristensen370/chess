@@ -11,14 +11,12 @@ public class MemoryUserDAOTest {
     public void clearUserSuccess() {
         UserDAO myDAO = new MemoryUserDAO();
         try {
-            myDAO.createUser("bob", "joe", "email@blah.com");
+            myDAO.createUser(new UserData("bob", "joe", "email@blah.com"));
             myDAO.clearUser();
         } catch (DataAccessException e) {
             fail(e.getMessage());
         }
-        assertThrows(DataAccessException.class, () -> {
-            myDAO.getUser("bob");
-        });
+        assertThrows(DataAccessException.class, () -> myDAO.getUser("bob"));
     }
 
     @Test
@@ -30,7 +28,7 @@ public class MemoryUserDAOTest {
         String email = "nada@gmail.com";
         try {
             var expected = new UserData(username, password, email);
-            var actual = myDAO.createUser(username, password, email);
+            var actual = myDAO.createUser(new UserData(username, password, email));
             assertEquals(expected, actual);
         } catch (DataAccessException e) {
             fail(e.getMessage());
@@ -44,21 +42,20 @@ public class MemoryUserDAOTest {
         String username = "bobbyboy";
         String password = "ILoveCats";
         String email = "nada@gmail.com";
+        var u = new UserData(username, password, email);
         try {
-            myDAO.createUser(username, password, email);
+            myDAO.createUser(u);
         } catch (DataAccessException e) {
             fail(e.getMessage());
         }
-        assertThrows(DataAccessException.class, () -> {
-            myDAO.createUser(username, "password", "email@blah.com");
-        });
+        assertThrows(DataAccessException.class, () -> myDAO.createUser(new UserData(username, "password", "email@blah.com")));
     }
 
     @Test
     public void getUserWhenUserThere() {
         UserDAO myDAO = new MemoryUserDAO();
         try {
-            var expected = myDAO.createUser("bobbyboy", "ILoveCats", "nada@gmail.com");
+            var expected = myDAO.createUser(new UserData("bobbyboy", "ILoveCats", "nada@gmail.com"));
             var actual = myDAO.getUser("bobbyboy");
             assertEquals(expected, actual);
         } catch (DataAccessException e) {
@@ -69,8 +66,6 @@ public class MemoryUserDAOTest {
     @Test
     public void getUserWhenUserNotThere() {
         UserDAO myDAO = new MemoryUserDAO();
-        assertThrows(DataAccessException.class, () -> {
-            myDAO.getUser("username");
-        });
+        assertThrows(DataAccessException.class, () -> myDAO.getUser("username"));
     }
 }
