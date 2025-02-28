@@ -20,7 +20,7 @@ public class MemoryGameDAO implements GameDAO {
     public GameData createGame(String gameName) {
         int gameID = database.size()+gameIDOffset;
         ChessGame game = new ChessGame();
-        GameData newGameData = new GameData(gameID, "", "", gameName, game);
+        GameData newGameData = new GameData(gameID, null, null, gameName, game);
         database.add(newGameData);
         return newGameData;
     }

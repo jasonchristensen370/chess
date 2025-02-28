@@ -90,8 +90,8 @@ public class Service {
     }
 
     private boolean playerColorTaken(String playerColor, GameData gameData) {
-        boolean whiteTaken = !gameData.whiteUsername().isEmpty();
-        boolean blackTaken = !gameData.blackUsername().isEmpty();
+        boolean whiteTaken = gameData.whiteUsername() != null;
+        boolean blackTaken = gameData.blackUsername() != null;
         return playerColor.equals("WHITE") ? whiteTaken : blackTaken;
     }
 
