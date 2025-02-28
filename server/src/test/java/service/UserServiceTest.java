@@ -25,7 +25,17 @@ public class UserServiceTest {
 
         var expected = new RegisterResult(null, null, "Error: already taken");
         RegisterResult actual = userService.register(req);
-        
+
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void clearSuccess() {
+        UserService service = new UserService();
+        RegisterRequest request = new RegisterRequest("jason", "secretpassword", "me@gmail.com");
+        service.register(request);
+        service.clear();
+        var res = service.register(request);
+        assertNull(res.message());
     }
 }

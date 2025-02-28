@@ -15,6 +15,12 @@ public class Handler {
         gameService = new GameService();
     }
 
+    public String clear() {
+        userService.clear();
+        gameService.clear();
+        return "{}";
+    }
+
     public String register(String body) {
         var serializer = new Gson();
         RegisterRequest req = serializer.fromJson(body, RegisterRequest.class);

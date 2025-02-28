@@ -1,10 +1,7 @@
 package server;
 
 import handler.Handler;
-import service.GameService;
-import service.UserService;
 import spark.*;
-
 import java.util.Map;
 
 public class Server {
@@ -25,15 +22,20 @@ public class Server {
         Spark.post("/user", this::register);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
-        Spark.init();
+//        Spark.init();
 
         Spark.awaitInitialization();
         return Spark.port();
     }
 
     private Object clear(Request req, Response res) {
-        res.status(200);
-        return "{}";
+        String result = handler.clear();
+        if (!result.contains("Error")) {
+            res.status(200);
+        } else {
+            res.status(failResponses.getOrDefault(result, 500));
+        }
+        return result;
     }
 
     private Object register(Request req, Response res) {
@@ -43,7 +45,7 @@ public class Server {
         if (!result.contains("Error")) {
             res.status(200);
         } else {
-            res.status(failResponses.get(result));
+            res.status(failResponses.getOrDefault(result, 500));
         }
         return result;
     }
