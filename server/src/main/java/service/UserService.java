@@ -2,9 +2,7 @@ package service;
 
 import dataaccess.*;
 import model.AuthData;
-import model.RegisterRequest;
-import model.RegisterResult;
-import model.UserData;
+import model.*;
 
 public class UserService {
     private final AuthDAO authDAO;
@@ -28,6 +26,24 @@ public class UserService {
         userDAO.createUser(newUserData);
         AuthData authData = authDAO.createAuth(req.username());
         return new RegisterResult(authData.username(), authData.authToken(), null);
+    }
+
+    public LoginResult login(LoginRequest req) {
+        UserData userData = userDAO.getUser(req.username());
+        if (userData == null) {
+            return new LoginResult(null, null, "Error: unauthorized");
+        }
+        AuthData authData = authDAO.createAuth(req.username());
+        return new LoginResult(authData.username(), authData.authToken(), null);
+    }
+
+    public LogoutResult logout(LogoutRequest req) {
+        AuthData authData = authDAO.getAuth(req.authToken());
+        if (authData == null) {
+            return new LogoutResult("Error: unauthorized");
+        }
+        authDAO.deleteAuth(authData.authToken());
+        return new LogoutResult(null);
     }
 
 }
