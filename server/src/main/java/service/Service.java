@@ -24,7 +24,9 @@ public class Service {
     }
 
     public RegisterResult register(RegisterRequest req) {
-        if (userDAO.getUser(req.username()) != null) {
+        if (req.email() == null || req.username() == null || req.password() == null) {
+            return new RegisterResult(null, null, "Error: bad request");
+        } else if (userDAO.getUser(req.username()) != null) {
             return new RegisterResult(null, null, "Error: already taken");
         }
         UserData newUserData = new UserData(req.username(), req.password(), req.email());
@@ -62,7 +64,9 @@ public class Service {
 
     public CreateGameResult createGame(CreateGameRequest req) {
         AuthData authData = authDAO.getAuth(req.authToken());
-        if (authData == null) {
+        if (req.gameName() == null) {
+            return new CreateGameResult(null, "Error: bad request");
+        } else if (authData == null) {
             return new CreateGameResult(null, "Error: unauthorized");
         }
         GameData gameData = gameDAO.createGame(req.gameName());
