@@ -3,9 +3,11 @@ package service;
 import model.*;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ServiceTest {
+public class ServiceTests {
     @Test
     public void registerSuccess() {
         Service userService = new Service();
@@ -81,10 +83,20 @@ public class ServiceTest {
     @Test
     public void listGamesSuccess() {
         Service service = new Service();
-        ListRequest listRequest = new ListRequest("authToken");
-        CreateGameRequest createGameRequest = new CreateGameRequest("authToken", "newGame");
-        service.listGames(listRequest);
+        RegisterResult regResult = service.register(new RegisterRequest("username", "password", "email"));
+        String authToken = regResult.authToken();
 
+        CreateGameRequest createGameRequest = new CreateGameRequest(authToken, "newGame");
+        service.createGame(createGameRequest);
+
+        var gameList = new ArrayList<GameData>();
+        gameList.add(new GameData(1, null, null, "newGame", null));
+        var expected = new ListResult(gameList, null);
+
+        ListRequest listRequest = new ListRequest(authToken);
+        var actual = service.listGames(listRequest);
+
+        assertEquals(expected, actual);
     }
 
     @Test public void listGamesFail() {
@@ -95,18 +107,64 @@ public class ServiceTest {
     }
 
     @Test public void createGameSuccess() {
+        Service service = new Service();
+        RegisterResult regResult = service.register(new RegisterRequest("username", "password", "email"));
+        String authToken = regResult.authToken();
 
+        CreateGameRequest createGameRequest = new CreateGameRequest(authToken, "game name");
+        var expected = new CreateGameResult(1, null);
+        var actual = service.createGame(createGameRequest);
+
+        assertEquals(expected, actual);
     }
 
     @Test public void createGameFail() {
+        Service service = new Service();
+        CreateGameRequest createGameRequest = new CreateGameRequest("bad auth token", "game name");
+        var expected = new CreateGameResult(null, "Error: unauthorized");
+        var actual = service.createGame(createGameRequest);
+        assertEquals(expected, actual);
 
+        RegisterResult regResult = service.register(new RegisterRequest("username", "password", "email"));
+        String authToken = regResult.authToken();
+        createGameRequest = new CreateGameRequest(authToken, null);
+        expected = new CreateGameResult(null, "Error: bad request");
+        actual = service.createGame(createGameRequest);
+        assertEquals(expected, actual);
     }
 
     @Test public void joinGameSuccess() {
+        Service service = new Service();
+        RegisterResult regResult = service.register(new RegisterRequest("username", "password", "email"));
+        String authToken = regResult.authToken();
 
+        CreateGameRequest createGameRequest = new CreateGameRequest(authToken, "game name");
+        var createGameResult = service.createGame(createGameRequest);
+
+        var joinRequest = new JoinGameRequest(authToken, "BLACK", createGameResult.gameID());
+        var expected = new JoinGameResult(null);
+        var actual = service.joinGame(joinRequest);
+        assertEquals(expected, actual);
+        ListRequest listRequest = new ListRequest(authToken);
+        GameData game = service.listGames(listRequest).games().getFirst();
+        GameData expectedGame = new GameData(createGameResult.gameID(), null, "username", "game name", null);
+
+        assertEquals(game, expectedGame);
     }
 
     @Test public void joinGameFail() {
+        Service service = new Service();
+        RegisterResult regResult = service.register(new RegisterRequest("username", "password", "email"));
+        String authToken = regResult.authToken();
 
+        CreateGameRequest createGameRequest = new CreateGameRequest(authToken, "game name");
+        var createGameResult = service.createGame(createGameRequest);
+
+        var joinRequest = new JoinGameRequest(authToken, "BLACK", createGameResult.gameID());
+        service.joinGame(joinRequest);
+        var expected = new JoinGameResult("Error: already taken");
+        var actual = service.joinGame(joinRequest);
+
+        assertEquals(expected, actual);
     }
 }
