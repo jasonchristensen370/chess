@@ -4,6 +4,8 @@ import dataaccess.*;
 import model.AuthData;
 import model.*;
 
+import java.util.ArrayList;
+
 public class Service {
     private final AuthDAO authDAO;
     private final UserDAO userDAO;
@@ -33,7 +35,7 @@ public class Service {
 
     public LoginResult login(LoginRequest req) {
         UserData userData = userDAO.getUser(req.username());
-        if (userData == null) {
+        if (userData == null || !userData.password().equals(req.password())) {
             return new LoginResult(null, null, "Error: unauthorized");
         }
         AuthData authData = authDAO.createAuth(req.username());
@@ -50,15 +52,43 @@ public class Service {
     }
 
     public ListResult listGames(ListRequest req) {
-        return null;
+        AuthData authData = authDAO.getAuth(req.authToken());
+        if (authData == null) {
+            return new ListResult(null, "Error: unauthorized");
+        }
+        ArrayList<GameData> games = gameDAO.listGames();
+        return new ListResult(games, null);
     }
 
     public CreateGameResult createGame(CreateGameRequest req) {
-        return null;
+        AuthData authData = authDAO.getAuth(req.authToken());
+        if (authData == null) {
+            return new CreateGameResult(null, "Error: unauthorized");
+        }
+        GameData gameData = gameDAO.createGame(req.gameName());
+        return new CreateGameResult(gameData.gameID(), null);
     }
 
     public JoinGameResult joinGame(JoinGameRequest req) {
-        return null;
+        AuthData authData = authDAO.getAuth(req.authToken());
+        if (authData == null) {
+            return new JoinGameResult("Error: unauthorized");
+        }
+        GameData gameData = gameDAO.getGame(req.gameID());
+        if (gameData == null) {
+            return new JoinGameResult("Error: bad request");
+        }
+        if (playerColorTaken(req.playerColor(), gameData)) {
+            return new JoinGameResult("Error: already taken");
+        }
+        gameDAO.updateGame(req.playerColor(), req.gameID(), authData.username());
+        return new JoinGameResult(null);
+    }
+
+    private boolean playerColorTaken(String playerColor, GameData gameData) {
+        boolean whiteTaken = !gameData.whiteUsername().isEmpty();
+        boolean blackTaken = !gameData.blackUsername().isEmpty();
+        return playerColor.equals("WHITE") ? whiteTaken : blackTaken;
     }
 
 }

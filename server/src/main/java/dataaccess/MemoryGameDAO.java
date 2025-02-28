@@ -27,7 +27,11 @@ public class MemoryGameDAO implements GameDAO {
         return database.get(gameID);
     }
     public ArrayList<GameData> listGames() {
-        return database;
+        ArrayList<GameData> newList = new ArrayList<>();
+        for (GameData data : database) {
+            newList.add(new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), null));
+        }
+        return newList;
     }
     public void updateGame(String playerColor, int gameID, String username) {
         GameData gameInfo = database.get(gameID);

@@ -37,16 +37,27 @@ public class Handler {
         return serializer.toJson(result);
     }
 
-    public String listGames(String body) {
-        return "{\"message\": \"Error: Not Implemented\"}";
+    public String listGames(String authToken) {
+        var serializer = new Gson();
+        ListRequest req = new ListRequest(authToken);
+        ListResult result = service.listGames(req);
+        return serializer.toJson(result);
     }
 
     public String createGame(String body, String authToken) {
-        return "{\"message\": \"Error: Not Implemented\"}";
+        var serializer = new Gson();
+        CreateGameRequestBody reqBody = serializer.fromJson(body, CreateGameRequestBody.class);
+        CreateGameRequest req = new CreateGameRequest(authToken, reqBody.gameName());
+        CreateGameResult result = service.createGame(req);
+        return serializer.toJson(result);
     }
 
     public String joinGame(String body, String authToken) {
-        return "{\"message\": \"Error: Not Implemented\"}";
+        var serializer = new Gson();
+        JoinGameRequestBody reqBody = serializer.fromJson(body, JoinGameRequestBody.class);
+        JoinGameRequest req = new JoinGameRequest(authToken, reqBody.playerColor(), reqBody.gameID());
+        JoinGameResult result = service.joinGame(req);
+        return serializer.toJson(result);
     }
 
 }
