@@ -2,42 +2,38 @@ package handler;
 
 import com.google.gson.Gson;
 import model.*;
-import service.GameService;
-import service.UserService;
+import service.Service;
 
 public class Handler {
-    private final UserService userService;
-    private final GameService gameService;
+    private final Service service;
 
     public Handler() {
-        userService = new UserService();
-        gameService = new GameService();
+        service = new Service();
     }
 
     public String clear() {
-        userService.clear();
-        gameService.clear();
+        service.clear();
         return "{}";
     }
 
     public String register(String body) {
         var serializer = new Gson();
         RegisterRequest req = serializer.fromJson(body, RegisterRequest.class);
-        RegisterResult result = userService.register(req);
+        RegisterResult result = service.register(req);
         return serializer.toJson(result);
     }
 
     public String login(String body) {
         var serializer = new Gson();
         LoginRequest req = serializer.fromJson(body, LoginRequest.class);
-        LoginResult result = userService.login(req);
+        LoginResult result = service.login(req);
         return serializer.toJson(result);
     }
 
     public String logout(String authToken) {
         var serializer = new Gson();
         LogoutRequest req = new LogoutRequest(authToken);
-        LogoutResult result = userService.logout(req);
+        LogoutResult result = service.logout(req);
         return serializer.toJson(result);
     }
 

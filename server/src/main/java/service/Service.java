@@ -4,18 +4,21 @@ import dataaccess.*;
 import model.AuthData;
 import model.*;
 
-public class UserService {
+public class Service {
     private final AuthDAO authDAO;
     private final UserDAO userDAO;
+    private final GameDAO gameDAO;
 
-    public UserService() {
+    public Service() {
         authDAO = new MemoryAuthDAO();
         userDAO = new MemoryUserDAO();
+        gameDAO = new MemoryGameDAO();
     }
 
     public void clear() {
         authDAO.clearAuth();
         userDAO.clearUser();
+        gameDAO.clearGame();
     }
 
     public RegisterResult register(RegisterRequest req) {
@@ -44,6 +47,18 @@ public class UserService {
         }
         authDAO.deleteAuth(authData.authToken());
         return new LogoutResult(null);
+    }
+
+    public ListResult listGames(ListRequest req) {
+        return null;
+    }
+
+    public CreateGameResult createGame(CreateGameRequest req) {
+        return null;
+    }
+
+    public JoinGameResult joinGame(JoinGameRequest req) {
+        return null;
     }
 
 }
