@@ -5,6 +5,7 @@ import model.AuthData;
 import model.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Service {
     private final AuthDAO authDAO;
@@ -73,13 +74,18 @@ public class Service {
         return new CreateGameResult(gameData.gameID(), null);
     }
 
+    // Join Game Request Members: (String authToken, String playerColor, Integer gameID)
     public JoinGameResult joinGame(JoinGameRequest req) {
+        if (req.gameID() == null || req.playerColor() == null || req.authToken() == null) {
+            return new JoinGameResult("Error: bad request");
+        }
+        ArrayList<String> allowedColors = new ArrayList<>(List.of("WHITE","BLACK"));
         AuthData authData = authDAO.getAuth(req.authToken());
         if (authData == null) {
             return new JoinGameResult("Error: unauthorized");
         }
         GameData gameData = gameDAO.getGame(req.gameID());
-        if (gameData == null) {
+        if (gameData == null || !allowedColors.contains(req.playerColor())) {
             return new JoinGameResult("Error: bad request");
         }
         if (playerColorTaken(req.playerColor(), gameData)) {
