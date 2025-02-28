@@ -29,10 +29,7 @@ public class MemoryGameDAO implements GameDAO {
     public ArrayList<GameData> listGames() {
         return database;
     }
-    public void updateGame(String playerColor, int gameID, String username) throws DataAccessException {
-        if (database.get(gameID) == null) {
-            throw new DataAccessException("Invalid gameID");
-        }
+    public void updateGame(String playerColor, int gameID, String username) {
         GameData gameInfo = database.get(gameID);
         String whiteUsername = gameInfo.whiteUsername();
         String blackUsername = gameInfo.blackUsername();

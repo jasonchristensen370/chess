@@ -3,69 +3,57 @@ package dataaccess;
 import model.UserData;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MemoryUserDAOTest {
 
     @Test
-    public void clearUserSuccess() {
+    public void clearUserSuccess() throws NoSuchFieldException, IllegalAccessException {
+        Map<String, UserData> expectedDB = new HashMap<>();
+        Map<String, UserData> testDB = new HashMap<>();
+        testDB.put("jason", new UserData("jason", "mypass", "email@gmail.com"));
         UserDAO myDAO = new MemoryUserDAO();
-        try {
-            myDAO.createUser(new UserData("bob", "joe", "email@blah.com"));
-            myDAO.clearUser();
-        } catch (DataAccessException e) {
-            fail(e.getMessage());
-        }
-        assertThrows(DataAccessException.class, () -> myDAO.getUser("bob"));
+
+        Field field = MemoryUserDAO.class.getDeclaredField("database");
+        field.setAccessible(true);
+
+        field.set(myDAO, testDB);
+        var actualDB = field.get(myDAO);
+        assertNotEquals(expectedDB, actualDB);
+
+        myDAO.clearUser();
+
+        actualDB = field.get(myDAO);
+        assertEquals(expectedDB, actualDB);
     }
 
     @Test
-    public void createUserInDatabase() {
+    public void createUserInDatabase() throws NoSuchFieldException, IllegalAccessException {
+        Map<String, UserData> expectedDB = new HashMap<>();
         UserDAO myDAO = new MemoryUserDAO();
 
-        String username = "bobbyboy";
-        String password = "ILoveCats";
-        String email = "nada@gmail.com";
-        try {
-            var expected = new UserData(username, password, email);
-            var actual = myDAO.createUser(new UserData(username, password, email));
-            assertEquals(expected, actual);
-        } catch (DataAccessException e) {
-            fail(e.getMessage());
-        }
-    }
+        Field field = MemoryUserDAO.class.getDeclaredField("database");
+        field.setAccessible(true);
 
-    @Test
-    public void createUserInDatabaseUsernameTaken() {
-        UserDAO myDAO = new MemoryUserDAO();
+        expectedDB.put("jason", new UserData("jason", "mypass", "email@gmail.com"));
 
-        String username = "bobbyboy";
-        String password = "ILoveCats";
-        String email = "nada@gmail.com";
-        var u = new UserData(username, password, email);
-        try {
-            myDAO.createUser(u);
-        } catch (DataAccessException e) {
-            fail(e.getMessage());
-        }
-        assertThrows(DataAccessException.class, () -> myDAO.createUser(new UserData(username, "password", "email@blah.com")));
+        var actualDB = field.get(myDAO);
+        assertNotEquals(expectedDB, actualDB);
+        myDAO.createUser(new UserData("jason", "mypass", "email@gmail.com"));
+        actualDB = field.get(myDAO);
+        assertEquals(expectedDB, actualDB);
     }
 
     @Test
     public void getUserWhenUserThere() {
         UserDAO myDAO = new MemoryUserDAO();
-        try {
-            var expected = myDAO.createUser(new UserData("bobbyboy", "ILoveCats", "nada@gmail.com"));
-            var actual = myDAO.getUser("bobbyboy");
-            assertEquals(expected, actual);
-        } catch (DataAccessException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void getUserWhenUserNotThere() {
-        UserDAO myDAO = new MemoryUserDAO();
-        assertThrows(DataAccessException.class, () -> myDAO.getUser("username"));
+        UserData user = new UserData("jason","password","email@email.com");
+        var expected = myDAO.createUser(user);
+        var actual = myDAO.getUser("jason");
+        assertEquals(expected, actual);
     }
 }

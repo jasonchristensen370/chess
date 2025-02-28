@@ -17,19 +17,13 @@ public class MemoryUserDAO implements UserDAO {
         database.clear();
     }
 
-    public UserData createUser(UserData u) throws DataAccessException{
+    public UserData createUser(UserData u) {
         String username = u.username();
-        if (database.containsKey(username)) {
-            throw new DataAccessException("Username already taken");
-        }
         database.put(username, u);
         return u;
     }
 
-    public UserData getUser(String username) throws DataAccessException {
-        if (!database.containsKey(username)) {
-            throw new DataAccessException("Username does not exist");
-        }
+    public UserData getUser(String username) {
         return database.get(username);
     }
 }

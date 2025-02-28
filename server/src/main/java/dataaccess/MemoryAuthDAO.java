@@ -23,16 +23,10 @@ public class MemoryAuthDAO implements AuthDAO {
         database.put(newAuthToken, newAuthData);
         return newAuthData;
     }
-    public AuthData getAuth(String authToken) throws DataAccessException {
-        if (!database.containsKey(authToken)) {
-            throw new DataAccessException("Invalid authToken");
-        }
+    public AuthData getAuth(String authToken) {
         return database.get(authToken);
     }
-    public void deleteAuth(String authToken) throws DataAccessException {
-        if (!database.containsKey(authToken)) {
-            throw new DataAccessException("Cannot delete non-existent authToken");
-        }
+    public void deleteAuth(String authToken) {
         database.remove(authToken);
     }
 }
