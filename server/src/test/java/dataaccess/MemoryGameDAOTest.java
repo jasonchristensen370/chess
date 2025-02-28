@@ -22,7 +22,7 @@ class MemoryGameDAOTest {
     @Test
     void createGame() {
         GameDAO myDAO = new MemoryGameDAO();
-        var expected = new GameData(0, "", "", "gamename", new ChessGame());
+        var expected = new GameData(1, null, null, "gamename", new ChessGame());
         var actual = myDAO.createGame("gamename");
         assertEquals(expected, actual);
     }
@@ -32,8 +32,8 @@ class MemoryGameDAOTest {
         GameDAO myDAO = new MemoryGameDAO();
         assertDoesNotThrow( () -> {
             myDAO.createGame("gamename");
-            var expected = new GameData(0, "", "", "gamename", new ChessGame());
-            var actual = myDAO.getGame(0);
+            var expected = new GameData(1, null, null, "gamename", new ChessGame());
+            var actual = myDAO.getGame(1);
             assertEquals(expected, actual);
         });
     }
@@ -41,13 +41,13 @@ class MemoryGameDAOTest {
     @Test
     void listGames() {
         GameDAO myDAO = new MemoryGameDAO();
-        myDAO.createGame("game0");
         myDAO.createGame("game1");
         myDAO.createGame("game2");
         myDAO.createGame("game3");
+        myDAO.createGame("game4");
         var expected = new ArrayList<>();
-        for (int i=0; i<4; i++) {
-            expected.add(new GameData(i, "", "", "game"+i, new ChessGame()));
+        for (int i=1; i<5; i++) {
+            expected.add(new GameData(i, null, null, "game"+i, null));
         }
         assertEquals(expected, myDAO.listGames());
     }
@@ -55,13 +55,12 @@ class MemoryGameDAOTest {
     @Test
     void updateGame() {
         GameDAO myDAO = new MemoryGameDAO();
-        myDAO.createGame("game0");
         myDAO.createGame("game1");
-        assertDoesNotThrow( () -> {
-            myDAO.updateGame("black", 1, "bob");
-            var expected = new GameData(1, "", "bob", "game1", new ChessGame());
-            var actual = myDAO.getGame(1);
-            assertEquals(expected, actual);
-        });
+        myDAO.createGame("game2");
+        myDAO.updateGame("black", 1, "bob");
+        var expected = new GameData(1, null, "bob", "game1", new ChessGame());
+        var actual = myDAO.getGame(1);
+        assertEquals(expected, actual);
+
     }
 }
