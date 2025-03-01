@@ -9,5 +9,5 @@ public interface GameDAO {
     GameData createGame(String gameName);
     GameData getGame(int gameID);
     ArrayList<GameData> listGames();
-    void updateGame(String playerColor, int gameID, String Username);
+    void updateGame(String playerColor, int gameID, String username);
 }

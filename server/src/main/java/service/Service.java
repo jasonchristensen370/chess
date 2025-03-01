@@ -3,6 +3,7 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.*;
+import serviceModel.*;
 
 import java.util.ArrayList;
 import java.util.List;

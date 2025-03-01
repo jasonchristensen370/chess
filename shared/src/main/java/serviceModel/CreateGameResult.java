@@ -1,4 +1,4 @@
-package model;
+package serviceModel;
 
 public record CreateGameResult(Integer gameID, String message) {
 }

@@ -1,8 +1,8 @@
 package handler;
 
 import com.google.gson.Gson;
-import model.*;
 import service.Service;
+import serviceModel.*;
 
 public class Handler {
     private final Service service;
