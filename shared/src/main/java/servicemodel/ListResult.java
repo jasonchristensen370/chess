@@ -1,4 +1,4 @@
-package serviceModel;
+package servicemodel;
 
 import model.GameData;
 

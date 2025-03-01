@@ -2,7 +2,7 @@ package service;
 
 import model.*;
 import org.junit.jupiter.api.Test;
-import serviceModel.*;
+import servicemodel.*;
 
 import java.util.ArrayList;
 
