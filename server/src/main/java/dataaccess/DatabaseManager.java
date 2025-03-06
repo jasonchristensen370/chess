@@ -9,6 +9,34 @@ public class DatabaseManager {
     private static final String PASSWORD;
     private static final String CONNECTION_URL;
 
+    private static final String[] createTableStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS userData (
+              username String NOT NULL,
+              password String NOT NULL,
+              email String NOT NULL,
+              PRIMARY KEY (username)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS authData (
+              authToken String NOT NULL,
+              username String NOT NULL,
+              PRIMARY KEY (authToken)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS gameData (
+              gameID int NOT NULL AUTO_INCREMENT,
+              whiteUsername String,
+              blackUsername String,
+              gameName String NOT NULL,
+              game String NOT NULL,
+              PRIMARY KEY (gameID)
+            )
+            """
+    };
+
     /*
      * Load the database information for the db.properties file.
      */
@@ -39,9 +67,24 @@ public class DatabaseManager {
     static void createDatabase() throws DataAccessException {
         try {
             var statement = "CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME;
-            var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
-            try (var preparedStatement = conn.prepareStatement(statement)) {
+            try (var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
+                 var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.executeUpdate();
+                // create tables
+                createTables();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    static private void createTables() throws DataAccessException {
+        try {
+            for (String statement : createTableStatements) {
+                try(var conn = getConnection();
+                    var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
