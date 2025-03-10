@@ -11,28 +11,28 @@ public class DatabaseManager {
 
     private static final String[] createTableStatements = {
             """
-            CREATE TABLE IF NOT EXISTS userData (
-              username String NOT NULL,
-              password String NOT NULL,
-              email String NOT NULL,
-              PRIMARY KEY (username)
+            CREATE TABLE IF NOT EXISTS `userData` (
+              `username` varchar(100) NOT NULL,
+              `password` varchar(100) NOT NULL,
+              `email` varchar(100) NOT NULL,
+              PRIMARY KEY (`username`)
             )
             """,
             """
-            CREATE TABLE IF NOT EXISTS authData (
-              authToken String NOT NULL,
-              username String NOT NULL,
-              PRIMARY KEY (authToken)
+            CREATE TABLE IF NOT EXISTS `authData` (
+              `authToken` varchar(100) NOT NULL,
+              `username` varchar(100) NOT NULL,
+              PRIMARY KEY (`authToken`)
             )
             """,
             """
-            CREATE TABLE IF NOT EXISTS gameData (
-              gameID int NOT NULL AUTO_INCREMENT,
-              whiteUsername String,
-              blackUsername String,
-              gameName String NOT NULL,
-              game String NOT NULL,
-              PRIMARY KEY (gameID)
+            CREATE TABLE IF NOT EXISTS `gameData` (
+              `gameID` int NOT NULL AUTO_INCREMENT,
+              `whiteUsername` varchar(100),
+              `blackUsername` varchar(100),
+              `gameName` varchar(100) NOT NULL,
+              `game` varchar(200) NOT NULL,
+              PRIMARY KEY (`gameID`)
             )
             """
     };
