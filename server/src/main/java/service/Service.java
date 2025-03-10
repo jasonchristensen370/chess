@@ -14,9 +14,9 @@ public class Service {
     private final GameDAO gameDAO;
 
     public Service() {
-        authDAO = new MemoryAuthDAO();
-        userDAO = new MemoryUserDAO();
-        gameDAO = new MemoryGameDAO();
+        authDAO = new SQLAuthDAO();
+        userDAO = new SQLUserDAO();
+        gameDAO = new SQLGameDAO();
     }
 
     public void clear() {
