@@ -58,24 +58,33 @@ public class Service {
     }
 
     public LogoutResult logout(LogoutRequest req) {
-        AuthData authData = authDAO.getAuth(req.authToken());
-        if (authData == null) {
-            return new LogoutResult("Error: unauthorized");
+        try {
+            AuthData authData = authDAO.getAuth(req.authToken());
+            if (authData == null) {
+                return new LogoutResult("Error: unauthorized");
+            }
+            authDAO.deleteAuth(authData.authToken());
+            return new LogoutResult(null);
+        } catch (DataAccessException e) {
+            return new LogoutResult(e.getMessage());
         }
-        authDAO.deleteAuth(authData.authToken());
-        return new LogoutResult(null);
     }
 
     public ListResult listGames(ListRequest req) {
-        AuthData authData = authDAO.getAuth(req.authToken());
-        if (authData == null) {
-            return new ListResult(null, "Error: unauthorized");
+        try {
+            AuthData authData = authDAO.getAuth(req.authToken());
+            if (authData == null) {
+                return new ListResult(null, "Error: unauthorized");
+            }
+            ArrayList<GameData> games = gameDAO.listGames();
+            return new ListResult(games, null);
+        } catch (DataAccessException e) {
+            return new ListResult(null, e.getMessage());
         }
-        ArrayList<GameData> games = gameDAO.listGames();
-        return new ListResult(games, null);
     }
 
     public CreateGameResult createGame(CreateGameRequest req) {
+        try {
         AuthData authData = authDAO.getAuth(req.authToken());
         if (req.gameName() == null) {
             return new CreateGameResult(null, "Error: bad request");
@@ -84,10 +93,14 @@ public class Service {
         }
         GameData gameData = gameDAO.createGame(req.gameName());
         return new CreateGameResult(gameData.gameID(), null);
+        } catch (DataAccessException e) {
+            return new CreateGameResult(null, e.getMessage());
+        }
     }
 
     // Join Game Request Members: (String authToken, String playerColor, Integer gameID)
     public JoinGameResult joinGame(JoinGameRequest req) {
+        try {
         if (req.gameID() == null || req.playerColor() == null || req.authToken() == null) {
             return new JoinGameResult("Error: bad request");
         }
@@ -105,6 +118,9 @@ public class Service {
         }
         gameDAO.updateGame(req.playerColor(), req.gameID(), authData.username());
         return new JoinGameResult(null);
+        } catch (DataAccessException e) {
+            return new JoinGameResult(e.getMessage());
+        }
     }
 
     private boolean playerColorTaken(String playerColor, GameData gameData) {
