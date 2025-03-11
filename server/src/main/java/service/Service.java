@@ -20,30 +20,41 @@ public class Service {
     }
 
     public void clear() {
-        authDAO.clearAuth();
-        userDAO.clearUser();
-        gameDAO.clearGame();
+        try {
+            authDAO.clearAuth();
+            userDAO.clearUser();
+            gameDAO.clearGame();
+        } catch (DataAccessException _) {
+        }
     }
 
     public RegisterResult register(RegisterRequest req) {
-        if (req.email() == null || req.username() == null || req.password() == null) {
-            return new RegisterResult(null, null, "Error: bad request");
-        } else if (userDAO.getUser(req.username()) != null) {
-            return new RegisterResult(null, null, "Error: already taken");
+        try {
+            if (req.email() == null || req.username() == null || req.password() == null) {
+                return new RegisterResult(null, null, "Error: bad request");
+            } else if (userDAO.getUser(req.username()) != null) {
+                return new RegisterResult(null, null, "Error: already taken");
+            }
+            UserData newUserData = new UserData(req.username(), req.password(), req.email());
+            userDAO.createUser(newUserData);
+            AuthData authData = authDAO.createAuth(req.username());
+            return new RegisterResult(authData.username(), authData.authToken(), null);
+        } catch (DataAccessException e) {
+            return new RegisterResult(null, null, e.getMessage());
         }
-        UserData newUserData = new UserData(req.username(), req.password(), req.email());
-        userDAO.createUser(newUserData);
-        AuthData authData = authDAO.createAuth(req.username());
-        return new RegisterResult(authData.username(), authData.authToken(), null);
     }
 
     public LoginResult login(LoginRequest req) {
-        UserData userData = userDAO.getUser(req.username());
-        if (userData == null || !userData.password().equals(req.password())) {
-            return new LoginResult(null, null, "Error: unauthorized");
+        try {
+            UserData userData = userDAO.getUser(req.username());
+            if (userData == null || !userData.password().equals(req.password())) {
+                return new LoginResult(null, null, "Error: unauthorized");
+            }
+            AuthData authData = authDAO.createAuth(req.username());
+            return new LoginResult(authData.username(), authData.authToken(), null);
+        } catch (DataAccessException e) {
+            return new LoginResult(null, null, e.getMessage());
         }
-        AuthData authData = authDAO.createAuth(req.username());
-        return new LoginResult(authData.username(), authData.authToken(), null);
     }
 
     public LogoutResult logout(LogoutRequest req) {

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MemoryUserDAOTest {
 
     @Test
-    public void clearUserSuccess() throws NoSuchFieldException, IllegalAccessException {
+    public void clearUserSuccess() throws NoSuchFieldException, IllegalAccessException, DataAccessException {
         Map<String, UserData> expectedDB = new HashMap<>();
         Map<String, UserData> testDB = new HashMap<>();
         testDB.put("jason", new UserData("jason", "mypass", "email@gmail.com"));
@@ -32,7 +32,7 @@ public class MemoryUserDAOTest {
     }
 
     @Test
-    public void createUserInDatabase() throws NoSuchFieldException, IllegalAccessException {
+    public void createUserInDatabase() throws NoSuchFieldException, IllegalAccessException, DataAccessException {
         Map<String, UserData> expectedDB = new HashMap<>();
         UserDAO myDAO = new MemoryUserDAO();
 
@@ -49,7 +49,7 @@ public class MemoryUserDAOTest {
     }
 
     @Test
-    public void getUserWhenUserThere() {
+    public void getUserWhenUserThere() throws DataAccessException {
         UserDAO myDAO = new MemoryUserDAO();
         UserData user = new UserData("jason","password","email@email.com");
         var expected = myDAO.createUser(user);
