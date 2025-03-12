@@ -12,26 +12,26 @@ public class DatabaseManager {
     private static final String[] createTableStatements = {
             """
             CREATE TABLE IF NOT EXISTS `userData` (
-              `username` varchar(100) NOT NULL,
-              `password` varchar(100) NOT NULL,
-              `email` varchar(100) NOT NULL,
+              `username` varchar(255) NOT NULL,
+              `password` varchar(255) NOT NULL,
+              `email` varchar(255) NOT NULL,
               PRIMARY KEY (`username`)
             )
             """,
             """
             CREATE TABLE IF NOT EXISTS `authData` (
-              `authToken` varchar(100) NOT NULL,
-              `username` varchar(100) NOT NULL,
+              `authToken` varchar(255) NOT NULL,
+              `username` varchar(255) NOT NULL,
               PRIMARY KEY (`authToken`)
             )
             """,
             """
             CREATE TABLE IF NOT EXISTS `gameData` (
               `gameID` int NOT NULL AUTO_INCREMENT,
-              `whiteUsername` varchar(100),
-              `blackUsername` varchar(100),
-              `gameName` varchar(100) NOT NULL,
-              `game` varchar(200) NOT NULL,
+              `whiteUsername` varchar(255),
+              `blackUsername` varchar(255),
+              `gameName` varchar(255) NOT NULL,
+              `game` text NOT NULL,
               PRIMARY KEY (`gameID`)
             )
             """
