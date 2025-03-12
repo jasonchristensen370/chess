@@ -5,9 +5,9 @@ import model.GameData;
 import java.util.ArrayList;
 
 public interface GameDAO {
-    void clearGame();
-    GameData createGame(String gameName);
-    GameData getGame(int gameID);
-    ArrayList<GameData> listGames();
-    void updateGame(String playerColor, int gameID, String username);
+    void clearGame() throws DataAccessException;
+    GameData createGame(String gameName) throws DataAccessException;
+    GameData getGame(int gameID) throws DataAccessException;
+    ArrayList<GameData> listGames() throws DataAccessException;
+    void updateGame(String playerColor, int gameID, String username) throws DataAccessException;
 }
