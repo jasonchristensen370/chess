@@ -1,8 +1,11 @@
 package dataaccess;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import org.junit.jupiter.api.*;
 
 import java.sql.SQLException;
+import model.GameData;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -77,12 +80,32 @@ public class SQLGameDAOTests {
 
     @Test
     public void getGameSuccess() {
-
+        try {
+            var s = new Gson();
+            ChessGame game = new ChessGame();
+            String jsonGame = s.toJson(game);
+            // Put gameData in database
+            var statement = "INSERT INTO gameData (gameID, gameName, game) VALUES (1, 'myGameName', ?)";
+            try (var conn = DatabaseManager.getConnection();
+                 var prepStatement = conn.prepareStatement(statement)) {
+                prepStatement.setString(1, jsonGame);
+                prepStatement.executeUpdate();
+            }
+            GameData actual = myDAO.getGame(1);
+            assertEquals(1, actual.gameID());
+            assertEquals("myGameName", actual.gameName());
+        } catch (DataAccessException | SQLException e) {
+            fail(e.getMessage());
+        }
     }
 
     @Test
     public void getGameFail() {
-
+        try {
+            assertNull(myDAO.getGame(0));
+        } catch (DataAccessException e) {
+            fail(e.getMessage());
+        }
     }
 
     @Test
