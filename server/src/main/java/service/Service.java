@@ -85,14 +85,14 @@ public class Service {
 
     public CreateGameResult createGame(CreateGameRequest req) {
         try {
-        AuthData authData = authDAO.getAuth(req.authToken());
-        if (req.gameName() == null) {
-            return new CreateGameResult(null, "Error: bad request");
-        } else if (authData == null) {
-            return new CreateGameResult(null, "Error: unauthorized");
-        }
-        GameData gameData = gameDAO.createGame(req.gameName());
-        return new CreateGameResult(gameData.gameID(), null);
+            AuthData authData = authDAO.getAuth(req.authToken());
+            if (req.gameName() == null) {
+                return new CreateGameResult(null, "Error: bad request");
+            } else if (authData == null) {
+                return new CreateGameResult(null, "Error: unauthorized");
+            }
+            GameData gameData = gameDAO.createGame(req.gameName());
+            return new CreateGameResult(gameData.gameID(), null);
         } catch (DataAccessException e) {
             return new CreateGameResult(null, e.getMessage());
         }
@@ -101,23 +101,23 @@ public class Service {
     // Join Game Request Members: (String authToken, String playerColor, Integer gameID)
     public JoinGameResult joinGame(JoinGameRequest req) {
         try {
-        if (req.gameID() == null || req.playerColor() == null || req.authToken() == null) {
-            return new JoinGameResult("Error: bad request");
-        }
-        ArrayList<String> allowedColors = new ArrayList<>(List.of("WHITE","BLACK"));
-        AuthData authData = authDAO.getAuth(req.authToken());
-        if (authData == null) {
-            return new JoinGameResult("Error: unauthorized");
-        }
-        GameData gameData = gameDAO.getGame(req.gameID());
-        if (gameData == null || !allowedColors.contains(req.playerColor())) {
-            return new JoinGameResult("Error: bad request");
-        }
-        if (playerColorTaken(req.playerColor(), gameData)) {
-            return new JoinGameResult("Error: already taken");
-        }
-        gameDAO.updateGame(req.playerColor(), req.gameID(), authData.username());
-        return new JoinGameResult(null);
+            if (req.gameID() == null || req.playerColor() == null || req.authToken() == null) {
+                return new JoinGameResult("Error: bad request");
+            }
+            ArrayList<String> allowedColors = new ArrayList<>(List.of("WHITE","BLACK"));
+            AuthData authData = authDAO.getAuth(req.authToken());
+            if (authData == null) {
+                return new JoinGameResult("Error: unauthorized");
+            }
+            GameData gameData = gameDAO.getGame(req.gameID());
+            if (gameData == null || !allowedColors.contains(req.playerColor())) {
+                return new JoinGameResult("Error: bad request");
+            }
+            if (playerColorTaken(req.playerColor(), gameData)) {
+                return new JoinGameResult("Error: already taken");
+            }
+            gameDAO.updateGame(req.playerColor(), req.gameID(), authData.username());
+            return new JoinGameResult(null);
         } catch (DataAccessException e) {
             return new JoinGameResult(e.getMessage());
         }
