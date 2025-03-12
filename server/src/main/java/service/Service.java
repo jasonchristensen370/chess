@@ -3,6 +3,7 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 import servicemodel.*;
 
 import java.util.ArrayList;
@@ -35,7 +36,8 @@ public class Service {
             } else if (userDAO.getUser(req.username()) != null) {
                 return new RegisterResult(null, null, "Error: already taken");
             }
-            UserData newUserData = new UserData(req.username(), req.password(), req.email());
+             String hashedPassword = BCrypt.hashpw(req.password(), BCrypt.gensalt());
+             UserData newUserData = new UserData(req.username(), hashedPassword, req.email());
             userDAO.createUser(newUserData);
             AuthData authData = authDAO.createAuth(req.username());
             return new RegisterResult(authData.username(), authData.authToken(), null);
@@ -47,7 +49,7 @@ public class Service {
     public LoginResult login(LoginRequest req) {
         try {
             UserData userData = userDAO.getUser(req.username());
-            if (userData == null || !userData.password().equals(req.password())) {
+            if (userData == null || !BCrypt.checkpw(req.password(), userData.password())) {
                 return new LoginResult(null, null, "Error: unauthorized");
             }
             AuthData authData = authDAO.createAuth(req.username());
