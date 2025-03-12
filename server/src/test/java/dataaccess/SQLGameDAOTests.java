@@ -24,7 +24,7 @@ public class SQLGameDAOTests {
     }
 
     @BeforeEach
-//    @AfterEach
+    @AfterEach
     public void clearGameData() {
         try {
             var statement = "DELETE FROM gameData";
