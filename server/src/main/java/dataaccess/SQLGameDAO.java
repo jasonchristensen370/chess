@@ -84,12 +84,23 @@ public class SQLGameDAO implements GameDAO{
         try {
             String whiteUser = null;
             String blackUser = null;
+            String statement = "SELECT * FROM gameData WHERE gameID=?";
+            try(var conn = DatabaseManager.getConnection();
+                var prepStatement = conn.prepareStatement(statement)) {
+                prepStatement.setInt(1, gameID);
+                var rs = prepStatement.executeQuery();
+                if (rs.next()) {
+                    whiteUser = rs.getString("whiteUsername");
+                    blackUser = rs.getString("blackUsername");
+                }
+            }
+
             if (playerColor.equalsIgnoreCase("WHITE")) {
                 whiteUser = username;
-            } else if (playerColor.equalsIgnoreCase("")){
+            } else if (playerColor.equalsIgnoreCase("BLACK")){
                 blackUser = username;
             }
-            String statement = "UPDATE gameData SET whiteUsername=?, blackUsername=? WHERE gameID=?";
+            statement = "UPDATE gameData SET whiteUsername=?, blackUsername=? WHERE gameID=?";
             try(var conn = DatabaseManager.getConnection();
                 var prepStatement = conn.prepareStatement(statement)) {
                 prepStatement.setString(1, whiteUser);

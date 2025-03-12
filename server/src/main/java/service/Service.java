@@ -40,7 +40,7 @@ public class Service {
             AuthData authData = authDAO.createAuth(req.username());
             return new RegisterResult(authData.username(), authData.authToken(), null);
         } catch (DataAccessException e) {
-            return new RegisterResult(null, null, e.getMessage());
+            return new RegisterResult(null, null, "Error: "+e.getMessage());
         }
     }
 
@@ -53,7 +53,7 @@ public class Service {
             AuthData authData = authDAO.createAuth(req.username());
             return new LoginResult(authData.username(), authData.authToken(), null);
         } catch (DataAccessException e) {
-            return new LoginResult(null, null, e.getMessage());
+            return new LoginResult(null, null, "Error: "+e.getMessage());
         }
     }
 
@@ -66,7 +66,7 @@ public class Service {
             authDAO.deleteAuth(authData.authToken());
             return new LogoutResult(null);
         } catch (DataAccessException e) {
-            return new LogoutResult(e.getMessage());
+            return new LogoutResult("Error: "+e.getMessage());
         }
     }
 
@@ -79,7 +79,7 @@ public class Service {
             ArrayList<GameData> games = gameDAO.listGames();
             return new ListResult(games, null);
         } catch (DataAccessException e) {
-            return new ListResult(null, e.getMessage());
+            return new ListResult(null, "Error: "+e.getMessage());
         }
     }
 
@@ -94,7 +94,7 @@ public class Service {
             GameData gameData = gameDAO.createGame(req.gameName());
             return new CreateGameResult(gameData.gameID(), null);
         } catch (DataAccessException e) {
-            return new CreateGameResult(null, e.getMessage());
+            return new CreateGameResult(null, "Error: "+e.getMessage());
         }
     }
 
@@ -119,7 +119,7 @@ public class Service {
             gameDAO.updateGame(req.playerColor(), req.gameID(), authData.username());
             return new JoinGameResult(null);
         } catch (DataAccessException e) {
-            return new JoinGameResult(e.getMessage());
+            return new JoinGameResult("Error: "+e.getMessage());
         }
     }
 
