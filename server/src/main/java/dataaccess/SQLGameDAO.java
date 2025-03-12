@@ -81,7 +81,26 @@ public class SQLGameDAO implements GameDAO{
     }
 
     public void updateGame(String playerColor, int gameID, String username)  throws DataAccessException{
+        try {
+            String whiteUser = null;
+            String blackUser = null;
+            if (playerColor.equalsIgnoreCase("WHITE")) {
+                whiteUser = username;
+            } else if (playerColor.equalsIgnoreCase("")){
+                blackUser = username;
+            }
+            String statement = "UPDATE gameData SET whiteUsername=?, blackUsername=? WHERE gameID=?";
+            try(var conn = DatabaseManager.getConnection();
+                var prepStatement = conn.prepareStatement(statement)) {
+                prepStatement.setString(1, whiteUser);
+                prepStatement.setString(2, blackUser);
+                prepStatement.setInt(3, gameID);
+                prepStatement.executeUpdate();
+            }
 
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     private GameData getGameDataFromResultSet(java.sql.ResultSet rs, boolean includeGame) throws SQLException {

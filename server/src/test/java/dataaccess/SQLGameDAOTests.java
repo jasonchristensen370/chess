@@ -147,11 +147,37 @@ public class SQLGameDAOTests {
 
     @Test
     public void updateGameSuccess() {
-
+        try {
+            var s = new Gson();
+            ChessGame game = new ChessGame();
+            String jsonGame = s.toJson(game);
+            // Put gameData in database
+            var statement = "INSERT INTO gameData (gameID, gameName, game) VALUES (1, 'myGameName', ?)";
+            try (var conn = DatabaseManager.getConnection();
+                 var prepStatement = conn.prepareStatement(statement)) {
+                prepStatement.setString(1, jsonGame);
+                prepStatement.executeUpdate();
+            }
+            myDAO.updateGame("WHITE", 1, "myUserName");
+            statement = "SELECT * FROM gameData";
+            try(var conn = DatabaseManager.getConnection();
+                var prepStatement = conn.prepareStatement(statement)) {
+                var rs = prepStatement.executeQuery();
+                assertTrue(rs.next());
+                assertEquals("myUserName", rs.getString("whiteUsername"));
+                assertNull(rs.getString("blackUsername"));
+            }
+        } catch (DataAccessException | SQLException e) {
+            fail(e.getMessage());
+        }
     }
 
     @Test
     public void updateGameFail() {
-
+        try {
+            myDAO.updateGame("BLACK", 0, "me");
+        } catch (DataAccessException e) {
+            fail(e.getMessage());
+        }
     }
 }
