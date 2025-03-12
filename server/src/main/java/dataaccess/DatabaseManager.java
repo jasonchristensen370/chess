@@ -9,7 +9,7 @@ public class DatabaseManager {
     private static final String PASSWORD;
     private static final String CONNECTION_URL;
 
-    private static final String[] createTableStatements = {
+    private static final String[] CREATE_TABLE_STATEMENTS = {
             """
             CREATE TABLE IF NOT EXISTS `userData` (
               `username` varchar(255) NOT NULL,
@@ -80,7 +80,7 @@ public class DatabaseManager {
 
     static private void createTables() throws DataAccessException {
         try {
-            for (String statement : createTableStatements) {
+            for (String statement : CREATE_TABLE_STATEMENTS) {
                 try(var conn = getConnection();
                     var preparedStatement = conn.prepareStatement(statement)) {
                     preparedStatement.executeUpdate();
