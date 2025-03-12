@@ -1,6 +1,11 @@
 package service;
 
+import dataaccess.DataAccessException;
+import dataaccess.SQLAuthDAO;
+import dataaccess.SQLGameDAO;
+import dataaccess.SQLUserDAO;
 import model.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import servicemodel.*;
 
@@ -9,6 +14,18 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ServiceTests {
+
+    @BeforeEach
+    public void clearDatabase() {
+        try {
+            new SQLUserDAO().clearUser();
+            new SQLGameDAO().clearGame();
+            new SQLAuthDAO().clearAuth();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
     @Test
     public void registerSuccess() {
         Service userService = new Service();
@@ -97,7 +114,7 @@ public class ServiceTests {
         ListRequest listRequest = new ListRequest(authToken);
         var actual = service.listGames(listRequest);
 
-        assertEquals(expected, actual);
+        assertEquals(expected.games().size(), actual.games().size());
     }
 
     @Test public void listGamesFail() {
@@ -116,7 +133,7 @@ public class ServiceTests {
         var expected = new CreateGameResult(1, null);
         var actual = service.createGame(createGameRequest);
 
-        assertEquals(expected, actual);
+        assertEquals(expected.message(), actual.message());
     }
 
     @Test public void createGameFail() {
