@@ -52,15 +52,7 @@ public class SQLGameDAO implements GameDAO{
                 prepStatement.setInt(1, gameID);
                 var rs = prepStatement.executeQuery();
                 if (rs.next()) {
-                    int id = rs.getInt("gameID");
-                    String whiteUser = rs.getString("whiteUsername");
-                    String blackUser = rs.getString("blackUsername");
-                    String gameName = rs.getString("gameName");
-                    String jsonGame = rs.getString("game");
-                    // Get ChessGame Object from json
-                    var serializer = new Gson();
-                    ChessGame game = serializer.fromJson(jsonGame, ChessGame.class);
-                    return new GameData(id, whiteUser, blackUser, gameName, game);
+                    return getGameDataFromResultSet(rs, true);
                 } else {
                     return null;
                 }
@@ -71,10 +63,39 @@ public class SQLGameDAO implements GameDAO{
     }
 
     public ArrayList<GameData> listGames()  throws DataAccessException{
-        return new ArrayList<>();
+        try {
+            ArrayList<GameData> result = new ArrayList<>();
+            String statement = "SELECT * FROM gameData";
+            try(var conn = DatabaseManager.getConnection();
+                var prepStatement = conn.prepareStatement(statement)) {
+                java.sql.ResultSet rs = prepStatement.executeQuery();
+                while (rs.next()) {
+                    result.add(getGameDataFromResultSet(rs, false));
+                }
+            }
+            return result;
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+
     }
 
     public void updateGame(String playerColor, int gameID, String username)  throws DataAccessException{
 
+    }
+
+    private GameData getGameDataFromResultSet(java.sql.ResultSet rs, boolean includeGame) throws SQLException {
+        int id = rs.getInt("gameID");
+        String whiteUser = rs.getString("whiteUsername");
+        String blackUser = rs.getString("blackUsername");
+        String gameName = rs.getString("gameName");
+        String jsonGame = rs.getString("game");
+        // Get ChessGame Object from json
+        ChessGame game = null;
+        if (includeGame) {
+            var serializer = new Gson();
+            game = serializer.fromJson(jsonGame, ChessGame.class);
+        }
+        return new GameData(id, whiteUser, blackUser, gameName, game);
     }
 }

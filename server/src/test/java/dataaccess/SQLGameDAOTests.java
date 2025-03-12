@@ -5,6 +5,8 @@ import com.google.gson.Gson;
 import org.junit.jupiter.api.*;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+
 import model.GameData;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -110,12 +112,37 @@ public class SQLGameDAOTests {
 
     @Test
     public void listGamesSuccess() {
-
+        try {
+            var expected = new ArrayList<>();
+            var s = new Gson();
+            ChessGame game = new ChessGame();
+            String jsonGame = s.toJson(game);
+            // Put gameData in database
+            for (var i=1; i<4; i++) {
+                var statement = "INSERT INTO gameData (gameID, gameName, game) VALUES (?, ?, ?)";
+                try (var conn = DatabaseManager.getConnection();
+                     var prepStatement = conn.prepareStatement(statement)) {
+                    prepStatement.setInt(1, i);
+                    prepStatement.setString(2, "game"+i);
+                    prepStatement.setString(3, jsonGame);
+                    prepStatement.executeUpdate();
+                }
+                expected.add(new GameData(i, null, null, "game"+i, null));
+            }
+            var actual = myDAO.listGames();
+            assertEquals(expected, actual);
+        } catch (DataAccessException | SQLException e) {
+            fail(e.getMessage());
+        }
     }
 
     @Test
     public void listGamesFail() {
-
+        try {
+            assertEquals(0, myDAO.listGames().size());
+        } catch (DataAccessException e) {
+            fail(e.getMessage());
+        }
     }
 
     @Test
