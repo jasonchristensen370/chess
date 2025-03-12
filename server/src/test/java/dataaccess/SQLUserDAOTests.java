@@ -22,8 +22,8 @@ public class SQLUserDAOTests {
     public void clearTable() {
         try {
             new SQLUserDAO().clearUser();
-        } catch (DataAccessException _) {
-
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 

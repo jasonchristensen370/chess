@@ -12,8 +12,8 @@ class MemoryAuthDAOTest {
             AuthDAO myDAO = new MemoryAuthDAO();
             var actual = myDAO.createAuth("username");
             assertEquals("username", actual.username());
-        } catch (DataAccessException _) {
-
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -24,8 +24,8 @@ class MemoryAuthDAOTest {
             var expected = myDAO.createAuth("username");
             var actual = myDAO.getAuth(expected.authToken());
             assertEquals(expected, actual);
-        } catch (DataAccessException _) {
-
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 }

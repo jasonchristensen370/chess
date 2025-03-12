@@ -25,7 +25,8 @@ public class Service {
             authDAO.clearAuth();
             userDAO.clearUser();
             gameDAO.clearGame();
-        } catch (DataAccessException _) {
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 

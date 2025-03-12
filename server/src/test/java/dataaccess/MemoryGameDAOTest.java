@@ -18,8 +18,8 @@ class MemoryGameDAOTest {
             assertEquals(1, myDAO.listGames().size());
             myDAO.clearGame();
             assertEquals(0, myDAO.listGames().size());
-        } catch (DataAccessException _) {
-
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -30,8 +30,8 @@ class MemoryGameDAOTest {
             var expected = new GameData(1, null, null, "gamename", new ChessGame());
             var actual = myDAO.createGame("gamename");
             assertEquals(expected, actual);
-        } catch (DataAccessException _) {
-
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -59,8 +59,8 @@ class MemoryGameDAOTest {
                 expected.add(new GameData(i, null, null, "game" + i, null));
             }
             assertEquals(expected, myDAO.listGames());
-        } catch (DataAccessException _) {
-
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -74,8 +74,8 @@ class MemoryGameDAOTest {
             var expected = new GameData(1, null, "bob", "game1", new ChessGame());
             var actual = myDAO.getGame(1);
             assertEquals(expected, actual);
-        } catch (DataAccessException _) {
-
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 }
