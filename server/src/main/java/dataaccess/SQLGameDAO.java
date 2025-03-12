@@ -35,7 +35,7 @@ public class SQLGameDAO implements GameDAO{
                 var resultSet = prepStatement.getGeneratedKeys();
                 int gameID = 0;
                 if (resultSet.next()) {
-                    gameID = resultSet.getInt("gameID");
+                    gameID = resultSet.getInt(1);
                 }
                 return new GameData(gameID, null, null, gameName, game);
             }
