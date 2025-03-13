@@ -79,20 +79,23 @@ public class ChessBoardGraphics {
         ChessPiece.PieceType type = piece.getPieceType();
         ChessGame.TeamColor color = piece.getTeamColor();
         return switch (type) {
-            case KING -> (color==ChessGame.TeamColor.WHITE ? WHITE_KING : BLACK_KING);
-            case QUEEN -> (color==ChessGame.TeamColor.WHITE ? WHITE_QUEEN : BLACK_QUEEN);
-            case ROOK -> (color==ChessGame.TeamColor.WHITE ? WHITE_ROOK : BLACK_ROOK);
-            case BISHOP -> (color==ChessGame.TeamColor.WHITE ? WHITE_BISHOP : BLACK_BISHOP);
-            case KNIGHT -> (color==ChessGame.TeamColor.WHITE ? WHITE_KNIGHT : BLACK_KNIGHT);
-            case PAWN -> (color==ChessGame.TeamColor.WHITE ? WHITE_PAWN : BLACK_PAWN);
+            case KING -> getPieceByColor(color, WHITE_KING, BLACK_KING);
+            case QUEEN -> getPieceByColor(color, WHITE_QUEEN, BLACK_QUEEN);
+            case ROOK -> getPieceByColor(color, WHITE_ROOK, BLACK_ROOK);
+            case BISHOP -> getPieceByColor(color, WHITE_BISHOP, BLACK_BISHOP);
+            case KNIGHT -> getPieceByColor(color, WHITE_KNIGHT, BLACK_KNIGHT);
+            case PAWN -> getPieceByColor(color, WHITE_PAWN, BLACK_PAWN);
         };
     }
 
+    private static String getPieceByColor(ChessGame.TeamColor color, String whitePiece, String blackPiece) {
+        return color == ChessGame.TeamColor.WHITE ? whitePiece : blackPiece;
+    }
+
     private static String getPieceTextColor(ChessPiece piece) {
-        if (piece != null) {
-            return piece.getTeamColor()==ChessGame.TeamColor.WHITE ? SET_TEXT_COLOR_WHITE : SET_TEXT_COLOR_BLACK;
-        } else {
+        if (piece == null) {
             return "";
         }
+        return piece.getTeamColor()==ChessGame.TeamColor.WHITE ? SET_TEXT_COLOR_WHITE : SET_TEXT_COLOR_BLACK;
     }
 }
