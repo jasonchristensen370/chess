@@ -64,7 +64,7 @@ public class Client {
             case "2":
                 loggedIn = clientCom.login();
                 // TODO: Remove after implementing server calls
-                loggedIn = true;
+//                loggedIn = true;
                 if (!loggedIn) {
                     out.println("\nFailed to login, please try again:");
                 }

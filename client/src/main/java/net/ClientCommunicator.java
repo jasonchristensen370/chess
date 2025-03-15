@@ -2,6 +2,7 @@ package net;
 
 import chess.ChessGame;
 import chess.ChessGame.TeamColor;
+import exception.ResponseException;
 import servicemodel.*;
 
 import java.io.PrintStream;
@@ -35,14 +36,19 @@ public class ClientCommunicator {
     }
 
     public boolean login() {
-        out.print("Please Input Username: ");
-        String username = scanner.nextLine();
-        out.print("Please Input Password: ");
-        String password = scanner.nextLine();
-        var req = new LoginRequest(username, password);
-        LoginResult res = serverFacade.login(req);
-        authToken = res.authToken();
-        return res.authToken() != null;
+        try {
+            out.print("Please Input Username: ");
+            String username = scanner.nextLine();
+            out.print("Please Input Password: ");
+            String password = scanner.nextLine();
+            var req = new LoginRequest(username, password);
+            LoginResult res = serverFacade.login(req);
+            authToken = res.authToken();
+            return res.authToken() != null;
+        } catch (ResponseException e) {
+            out.println(e.statusCode()+": "+e.getMessage());
+            return false;
+        }
     }
 
     public boolean logout() {
