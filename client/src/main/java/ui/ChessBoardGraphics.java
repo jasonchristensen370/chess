@@ -13,7 +13,7 @@ import static ui.EscapeSequences.*;
 
 // Draws the chess board
 public class ChessBoardGraphics {
-    private static final String TERMINAL_COLOR = SET_BG_COLOR_BLACK;
+    private static final String TERMINAL_COLOR = RESET_BG_COLOR;
     private static final String SET_BG_BORDER = SET_BG_COLOR_BLACK+SET_TEXT_COLOR_WHITE+SET_TEXT_BOLD;
 
     private static ChessBoard board;
