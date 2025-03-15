@@ -2,6 +2,7 @@ package ui;
 
 import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessGame.TeamColor;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
@@ -19,28 +20,42 @@ public class ChessBoardGraphics {
 
     // Throw this away later, client will call methods in this class.
     public static void main(String[] args) {
-        drawChessBoard(new ChessGame());
+        drawChessBoard(new ChessGame(), TeamColor.WHITE);
     }
 
-    public static void drawChessBoard(ChessGame game) {
+    public static void drawChessBoard(ChessGame game, TeamColor color) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         board = game.getBoard();
-        drawHeader(out);
-        for (int row=8; row>0; row--) {
-            drawRow(out, row);
+        drawHeader(out, color);
+
+        boolean countdown = color == TeamColor.WHITE;
+        int start = countdown ? 8 : 1;
+        int end = countdown ? 1 : 8;
+        int step = countdown ? -1 : 1;
+        for (int row=start; countdown ? row>=end : row<=end;  row += step) {
+            drawRow(out, row, color);
         }
-        drawHeader(out);
+
+        drawHeader(out, color);
         resetTextSettings(out);
     }
 
-    public static void drawHeader(PrintStream out) {
+    public static void drawHeader(PrintStream out, TeamColor color) {
         out.print(SET_BG_BORDER);
-        out.println(EMPTY+" a  b  c  d  e  f  g  h "+EMPTY+TERMINAL_COLOR);
+        if (color == TeamColor.WHITE) {
+            out.println(EMPTY+" a  b  c  d  e  f  g  h "+EMPTY+TERMINAL_COLOR);
+        } else {
+            out.println(EMPTY+" h  g  f  e  d  c  b  a "+EMPTY+TERMINAL_COLOR);
+        }
     }
 
-    public static void drawRow(PrintStream out, int row) {
+    public static void drawRow(PrintStream out, int row, TeamColor color) {
         out.print(SET_BG_BORDER+" "+row+" ");
-        for (int col=1; col<9; col++) {
+        boolean countdown = color != TeamColor.WHITE;
+        int start = countdown ? 8 : 1;
+        int end = countdown ? 1 : 8;
+        int step = countdown ? -1 : 1;
+        for (int col=start; countdown ? col>=end : col<=end;  col += step) {
             ChessPosition pos = new ChessPosition(row, col);
             if (row % 2 == 0) {
                 if (col % 2 == 1) {
