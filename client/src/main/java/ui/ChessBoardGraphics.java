@@ -30,6 +30,7 @@ public class ChessBoardGraphics {
             drawRow(out, row);
         }
         drawHeader(out);
+        resetTextSettings(out);
     }
 
     public static void drawHeader(PrintStream out) {
@@ -97,5 +98,9 @@ public class ChessBoardGraphics {
             return "";
         }
         return piece.getTeamColor()==ChessGame.TeamColor.WHITE ? SET_TEXT_COLOR_WHITE : SET_TEXT_COLOR_BLACK;
+    }
+
+    private static void resetTextSettings(PrintStream out) {
+        out.print(RESET_TEXT_BOLD_FAINT+RESET_BG_COLOR+RESET_TEXT_COLOR);
     }
 }
