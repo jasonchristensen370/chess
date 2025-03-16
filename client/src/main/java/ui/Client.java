@@ -9,7 +9,7 @@ import static ui.EscapeSequences.*;
 // Draws the Menu
 public class Client {
 
-    private static final String BG = SET_BG_COLOR_BLACK;
+//    private static final String BG = SET_BG_COLOR_BLACK;
     private boolean loggedIn;
     private boolean exit;
     PrintStream out;
@@ -63,8 +63,6 @@ public class Client {
                 break;
             case "2":
                 loggedIn = clientCom.login();
-                // TODO: Remove after implementing server calls
-//                loggedIn = true;
                 if (!loggedIn) {
                     out.println("\nFailed to login, please try again:");
                 }
@@ -98,8 +96,6 @@ public class Client {
                 out.println("\nEnter one of the option numbers to get started.");
             case "2": // Logout
                 loggedIn = !clientCom.logout();
-                // TODO: Remove after implementing server calls
-                loggedIn = false;
                 if (loggedIn) {
                     out.println("\nFailed to logout.");
                 }
