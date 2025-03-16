@@ -70,8 +70,10 @@ public class ServerFacade {
             if (authToken != null) {
                 http.setRequestProperty("authorization", authToken);
             }
-            try (OutputStream reqBody = http.getOutputStream()) {
-                reqBody.write(reqData.getBytes());
+            if (!http.getRequestMethod().equals("GET")) {
+                try (OutputStream reqBody = http.getOutputStream()) {
+                    reqBody.write(reqData.getBytes());
+                }
             }
         }
     }

@@ -12,6 +12,8 @@ import server.Server;
 import servicemodel.*;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -100,7 +102,7 @@ public class ServerFacadeTests {
         } catch (DataAccessException e) {
             throw new RuntimeException(e.getMessage());
         } catch (ResponseException e) {
-            fail("ResponseException "+e.statusCode()+" "+e.getMessage());
+            fail(getResponseExceptionMessage(e));
         }
     }
 
@@ -108,10 +110,40 @@ public class ServerFacadeTests {
     public void logoutFail() {
         try {
             facade.logout(new LogoutRequest("J"));
-            fail("Failed to throw exception when user doesn't exist.");
+            fail("Failed to throw exception when authToken is invalid.");
         } catch (ResponseException e) {
             assertEquals("Error: unauthorized", e.getMessage());
             assertEquals(401, e.statusCode());
         }
+    }
+
+    @Test
+    public void listGamesSuccess() {
+        try {
+            var dao = new SQLAuthDAO();
+            var authToken = dao.createAuth("j").authToken();
+            var res = facade.listGames(new ListRequest(authToken));
+            assertNull(res.message());
+            assertEquals(new ArrayList<>(), res.games());
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (ResponseException e) {
+            fail(getResponseExceptionMessage(e));
+        }
+    }
+
+    @Test
+    public void listGamesFail() {
+        try {
+            facade.logout(new LogoutRequest("J"));
+            fail("Failed to throw exception when authToken is invalid.");
+        } catch (ResponseException e) {
+            assertEquals("Error: unauthorized", e.getMessage());
+            assertEquals(401, e.statusCode());
+        }
+    }
+
+    private String getResponseExceptionMessage(ResponseException e) {
+        return "ResponseException "+e.statusCode()+" "+e.getMessage();
     }
 }
