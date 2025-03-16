@@ -8,41 +8,44 @@ import java.io.*;
 
 // Calls ClientCommunicator for http calls
 public class ServerFacade {
+    private final String serverUrl;
+
+    public ServerFacade(int port) {
+        serverUrl = "http://localhost:"+port;
+    }
 
     public LoginResult login(LoginRequest req) throws ResponseException {
         var path = "/session";
         return makeRequest("POST", path, req, LoginResult.class);
-//        return new LoginResult(null, null, "Error: Not Implemented");
     }
 
-    public RegisterResult register(RegisterRequest req) {
+    public RegisterResult register(RegisterRequest req) throws ResponseException {
         var path = "/user";
-        return new RegisterResult(null, null, "Error: Not Implemented");
+        return makeRequest("POST", path, req, RegisterResult.class);
     }
 
-    public LogoutResult logout(LogoutRequest req) {
+    public LogoutResult logout(LogoutRequest req) throws ResponseException {
         var path = "/session";
-        return new LogoutResult("Error: Not Implemented");
+        return makeRequest("DELETE", path, req, LogoutResult.class);
     }
 
-    public ListResult listGames(ListRequest req) {
+    public ListResult listGames(ListRequest req) throws ResponseException {
         var path = "/game";
-        return new ListResult(null, "Error: Not Implemented");
+        return makeRequest("GET", path, req, ListResult.class);
     }
 
-    public CreateGameResult createGame(CreateGameRequest req) {
+    public CreateGameResult createGame(CreateGameRequest req) throws ResponseException {
         var path = "/game";
-        return new CreateGameResult(null, "Error: Not Implemented");
+        return makeRequest("POST", path, req, CreateGameResult.class);
     }
 
-    public JoinGameResult joinGame(JoinGameRequest req) {
+    public JoinGameResult joinGame(JoinGameRequest req) throws ResponseException {
         var path = "/game";
-        return new JoinGameResult("Error: Not Implemented");
+        return makeRequest("PUT", path, req, JoinGameResult.class);
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
-            String serverUrl = "http://localhost:8080";
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);

@@ -16,18 +16,23 @@ public class ResponseException extends Exception {
         this.statusCode = statusCode;
     }
 
-    public String toJson() {
-        return new Gson().toJson(Map.of("message", getMessage(), "status", statusCode));
-    }
-
     public static ResponseException fromJson(InputStream stream) {
         var map = new Gson().fromJson(new InputStreamReader(stream), HashMap.class);
-        var status = ((Double)map.get("status")).intValue();
         String message = map.get("message").toString();
+        var status = getStatusCode(message);
         return new ResponseException(status, message);
     }
 
     public int statusCode() {
         return statusCode;
+    }
+
+    private static int getStatusCode(String message) {
+        Map<String, Integer> failResponses = Map.of(
+                "Error: bad request", 400,
+                "Error: unauthorized", 401,
+                "Error: already taken", 403
+        );
+        return failResponses.getOrDefault(message, 500);
     }
 }
