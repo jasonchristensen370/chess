@@ -5,11 +5,12 @@ import dataaccess.SQLAuthDAO;
 import dataaccess.SQLGameDAO;
 import dataaccess.SQLUserDAO;
 import exception.ResponseException;
+import model.UserData;
 import net.ServerFacade;
 import org.junit.jupiter.api.*;
 import server.Server;
 import servicemodel.*;
-
+import org.mindrot.jbcrypt.BCrypt;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -59,5 +60,31 @@ public class ServerFacadeTests {
     public void registerFail() {
         var req = new RegisterRequest("username", null, "test@mail.com");
         assertThrows(ResponseException.class, () -> facade.register(req));
+    }
+
+    @Test
+    public void loginSuccess() {
+        try {
+            new SQLUserDAO().createUser(new UserData("testUser", BCrypt.hashpw("testPass", BCrypt.gensalt()), "test@mail.com"));
+            var res = facade.login(new LoginRequest("testUser", "testPass"));
+            assertEquals("testUser", res.username());
+            assertNull(res.message());
+            assertTrue(res.authToken().length() > 10);
+        } catch (DataAccessException e) {
+            fail("DataAccessException "+e.getMessage());
+        } catch (ResponseException e) {
+            fail("ResponseException "+e.statusCode()+" "+e.getMessage());
+        }
+    }
+
+    @Test
+    public void loginFail() {
+        try {
+            facade.login(new LoginRequest("J", "a"));
+            fail("Failed to throw exception when user doesn't exist.");
+        } catch (ResponseException e) {
+            assertEquals("Error: unauthorized", e.getMessage());
+            assertEquals(401, e.statusCode());
+        }
     }
 }
