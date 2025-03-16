@@ -23,7 +23,7 @@ public class ServerFacadeTests {
     @BeforeAll
     public static void init() {
         server = new Server();
-        int port = server.run(8081);
+        int port = server.run(8080);
         System.out.println("Started test HTTP server on " + port);
         facade = new ServerFacade(port);
     }
@@ -81,6 +81,33 @@ public class ServerFacadeTests {
     public void loginFail() {
         try {
             facade.login(new LoginRequest("J", "a"));
+            fail("Failed to throw exception when user doesn't exist.");
+        } catch (ResponseException e) {
+            assertEquals("Error: unauthorized", e.getMessage());
+            assertEquals(401, e.statusCode());
+        }
+    }
+
+    @Test
+    public void logoutSuccess() {
+        try {
+            var dao = new SQLAuthDAO();
+            new SQLUserDAO().createUser(new UserData("j", BCrypt.hashpw("j", BCrypt.gensalt()), "j"));
+            var authData = dao.createAuth("j");
+            var res = facade.logout(new LogoutRequest(authData.authToken()));
+            assertNull(res.message());
+            assertNull(dao.getAuth(authData.authToken()));
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (ResponseException e) {
+            fail("ResponseException "+e.statusCode()+" "+e.getMessage());
+        }
+    }
+
+    @Test
+    public void logoutFail() {
+        try {
+            facade.logout(new LogoutRequest("J"));
             fail("Failed to throw exception when user doesn't exist.");
         } catch (ResponseException e) {
             assertEquals("Error: unauthorized", e.getMessage());
