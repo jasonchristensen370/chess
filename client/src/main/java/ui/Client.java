@@ -57,13 +57,13 @@ public class Client {
             case "1":
                 loggedIn = clientCom.register();
                 if (!loggedIn) {
-                    out.println("\nFailed to login, please try again:");
+                    out.println("\nFailed to register, please try again:");
                 }
                 break;
             case "2":
                 loggedIn = clientCom.login();
                 if (!loggedIn) {
-                    out.println("\nFailed to login, please try again:");
+                    out.println("\nUsername or password incorrect, please try again:");
                 }
                 break;
             case "3":

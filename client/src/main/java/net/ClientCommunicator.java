@@ -94,7 +94,7 @@ public class ClientCommunicator {
             if (res.message() != null) {
                 return false;
             } else if (res.games() == null || res.games().isEmpty()) {
-                out.println("There are no games to list.");
+                out.println("\nThere are no games to list.");
             } else {
                 printGameList(res.games());
             }
