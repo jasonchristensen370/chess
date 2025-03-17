@@ -56,15 +56,9 @@ public class Client {
         switch(input) {
             case "1":
                 loggedIn = clientCom.register();
-                if (!loggedIn) {
-                    out.println("\nFailed to register, please try again:");
-                }
                 break;
             case "2":
                 loggedIn = clientCom.login();
-                if (!loggedIn) {
-                    out.println("\nUsername or password incorrect, please try again:");
-                }
                 break;
             case "3":
                 exit=true;
@@ -95,31 +89,18 @@ public class Client {
                 out.println("\nEnter one of the option numbers to get started.");
             case "2": // Logout
                 loggedIn = !clientCom.logout();
-                if (loggedIn) {
-                    out.println("\nFailed to logout.");
-                }
                 break;
             case "3": // Create Game
-                if (clientCom.createGame()) {
-                    out.println("\nGame Created!");
-                } else {
-                    out.println("\nGame was not created.");
-                }
+                clientCom.createGame();
                 break;
             case "4": // List Games
-                if (!clientCom.listGames()) {
-                    out.println("Failed to list games.");
-                }
+                clientCom.listGames();
                 break;
             case "5": // Play Game
-                if (!clientCom.playGame()) {
-                    out.println("Failed to join the game.");
-                }
+                clientCom.playGame();
                 break;
             case "6": // Observe Game
-                if (!clientCom.observeGame()) {
-                    out.println("Failed to observe the game.");
-                }
+                clientCom.observeGame();
                 break;
         }
     }

@@ -41,7 +41,7 @@ public class ClientCommunicator {
             authToken = res.authToken();
             return res.authToken() != null;
         } catch (ResponseException e) {
-            out.println(e.statusCode()+": "+e.getMessage());
+            out.println("\nFailed to register, please try again:");
             return false;
         }
     }
@@ -57,7 +57,7 @@ public class ClientCommunicator {
             authToken = res.authToken();
             return res.authToken() != null;
         } catch (ResponseException e) {
-            out.println(e.statusCode()+": "+e.getMessage());
+            out.println("\nUsername or password incorrect, please try again:");
             return false;
         }
     }
@@ -69,39 +69,36 @@ public class ClientCommunicator {
             authToken = null;
             return res.message() == null;
         } catch (ResponseException e) {
-            out.println(e.statusCode()+": "+e.getMessage());
+            out.println("\nFailed to logout.");
             return false;
         }
     }
 
-    public boolean createGame() {
+    public void createGame() {
         try {
             out.print("Please Input Game Name: ");
             String gameName = scanner.nextLine();
             CreateGameRequest req = new CreateGameRequest(authToken, gameName);
             CreateGameResult res = serverFacade.createGame(req);
-            return res.message() == null;
+            if (res.message() == null) {
+                out.println("\nGame Created!");
+            }
         } catch (ResponseException e) {
-            out.println(e.statusCode()+": "+e.getMessage());
-            return false;
+            out.println("\nGame was not created.");
         }
     }
 
-    public boolean listGames() {
+    public void listGames() {
         try {
             var req = new ListRequest(authToken);
             var res = serverFacade.listGames(req);
-            if (res.message() != null) {
-                return false;
-            } else if (res.games() == null || res.games().isEmpty()) {
+            if (res.games() == null || res.games().isEmpty()) {
                 out.println("\nThere are no games to list.");
             } else {
                 printGameList(res.games());
             }
-            return true;
         } catch (ResponseException e) {
-            out.println(e.statusCode()+": "+e.getMessage());
-            return false;
+            out.println("Failed to list games.");
         }
     }
 
@@ -121,7 +118,7 @@ public class ClientCommunicator {
         out.println(gameID+": \""+gameName+"\", WHITE: "+whiteUsername+", BLACK: "+blackUsername);
     }
 
-    public boolean playGame() {
+    public void playGame() {
         try {
             out.print("Please Input Game Number to Join: ");
             // TODO: Add error handling for bad input
@@ -130,20 +127,23 @@ public class ClientCommunicator {
             String color = scanner.nextLine();
             int gameID = listGameIDs.get(gameNum);
             var req = new JoinGameRequest(authToken, color, gameID);
-            var res = serverFacade.joinGame(req);
+            serverFacade.joinGame(req);
             TeamColor teamColor = color.equalsIgnoreCase("WHITE") ? TeamColor.WHITE : TeamColor.BLACK;
             ui.ChessBoardGraphics.drawChessBoard(new ChessGame(), teamColor);
-            return res.message() == null;
+            // Display board until they press enter
+            scanner.nextLine();
         } catch (ResponseException e) {
-            out.println(e.statusCode()+": "+e.getMessage());
-            return false;
+            out.println("Failed to join the game.");
         }
     }
 
-    public boolean observeGame() {
+    public void observeGame() {
         out.print("Please Input Game Number to Observe: ");
         String gameNum = scanner.nextLine();
         ui.ChessBoardGraphics.drawChessBoard(new ChessGame(), TeamColor.WHITE);
-        return true;
+        // Display board until they press enter
+        scanner.nextLine();
+        // If you can't observe it, print error message
+        // out.println("Failed to observe the game.");
     }
 }
