@@ -135,11 +135,70 @@ public class ServerFacadeTests {
     @Test
     public void listGamesFail() {
         try {
-            facade.logout(new LogoutRequest("J"));
+            facade.listGames(new ListRequest("J"));
             fail("Failed to throw exception when authToken is invalid.");
         } catch (ResponseException e) {
             assertEquals("Error: unauthorized", e.getMessage());
             assertEquals(401, e.statusCode());
+        }
+    }
+
+    @Test
+    public void createGameSuccess() {
+        try {
+            var dao = new SQLAuthDAO();
+            var authData = dao.createAuth("j");
+            var res = facade.createGame(new CreateGameRequest(authData.authToken(), "newGame"));
+            assertNull(res.message());
+            assertTrue(res.gameID() > 1);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (ResponseException e) {
+            fail(getResponseExceptionMessage(e));
+        }
+    }
+
+    @Test
+    public void createGameFail() {
+        try {
+            var dao = new SQLAuthDAO();
+            var authData = dao.createAuth("j");
+            facade.createGame(new CreateGameRequest(authData.authToken(), null));
+            fail("Failed to throw exception on bad request");
+        } catch (ResponseException e) {
+            assertEquals("Error: bad request", e.getMessage());
+            assertEquals(400, e.statusCode());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void joinGameSuccess() {
+        try {
+            var authDAO = new SQLAuthDAO();
+            var authData = authDAO.createAuth("J");
+            var gameDAO = new SQLGameDAO();
+            var gameData = gameDAO.createGame("game 1");
+            var res = facade.joinGame(new JoinGameRequest(authData.authToken(), "WHITE", gameData.gameID()));
+            assertNull(res.message());
+            var getGameData = gameDAO.getGame(gameData.gameID());
+            assertEquals("J", getGameData.whiteUsername());
+        } catch (ResponseException e) {
+            fail(getResponseExceptionMessage(e));
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Test
+    public void joinGameFail() {
+        try {
+            facade.joinGame(new JoinGameRequest("J", "WHITE", null));
+            fail("Failed to throw exception when gameID is null.");
+        } catch (ResponseException e) {
+            assertEquals("Error: bad request", e.getMessage());
+            assertEquals(400, e.statusCode());
         }
     }
 
