@@ -52,7 +52,7 @@ public class SQLGameDAO implements GameDAO{
                 prepStatement.setInt(1, gameID);
                 var rs = prepStatement.executeQuery();
                 if (rs.next()) {
-                    return getGameDataFromResultSet(rs, true);
+                    return getGameDataFromResultSet(rs);
                 } else {
                     return null;
                 }
@@ -70,7 +70,7 @@ public class SQLGameDAO implements GameDAO{
                 var prepStatement = conn.prepareStatement(statement)) {
                 java.sql.ResultSet rs = prepStatement.executeQuery();
                 while (rs.next()) {
-                    result.add(getGameDataFromResultSet(rs, false));
+                    result.add(getGameDataFromResultSet(rs));
                 }
             }
             return result;
@@ -114,18 +114,15 @@ public class SQLGameDAO implements GameDAO{
         }
     }
 
-    private GameData getGameDataFromResultSet(java.sql.ResultSet rs, boolean includeGame) throws SQLException {
+    private GameData getGameDataFromResultSet(java.sql.ResultSet rs) throws SQLException {
         int id = rs.getInt("gameID");
         String whiteUser = rs.getString("whiteUsername");
         String blackUser = rs.getString("blackUsername");
         String gameName = rs.getString("gameName");
         String jsonGame = rs.getString("game");
         // Get ChessGame Object from json
-        ChessGame game = null;
-        if (includeGame) {
-            var serializer = new Gson();
-            game = serializer.fromJson(jsonGame, ChessGame.class);
-        }
+        var serializer = new Gson();
+        var game = serializer.fromJson(jsonGame, ChessGame.class);
         return new GameData(id, whiteUser, blackUser, gameName, game);
     }
 }

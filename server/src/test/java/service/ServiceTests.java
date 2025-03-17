@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.DataAccessException;
 import dataaccess.SQLAuthDAO;
 import dataaccess.SQLGameDAO;
@@ -165,7 +166,7 @@ public class ServiceTests {
         assertEquals(expected, actual);
         ListRequest listRequest = new ListRequest(authToken);
         GameData game = service.listGames(listRequest).games().getFirst();
-        GameData expectedGame = new GameData(createGameResult.gameID(), null, "username", "game name", null);
+        GameData expectedGame = new GameData(createGameResult.gameID(), null, "username", "game name", new ChessGame());
 
         assertEquals(game, expectedGame);
     }
