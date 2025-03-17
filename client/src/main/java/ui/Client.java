@@ -4,7 +4,6 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import net.ClientCommunicator;
-import static ui.EscapeSequences.*;
 
 // Draws the Menu
 public class Client {
@@ -113,15 +112,17 @@ public class Client {
                 }
                 break;
             case "5": // Play Game
-                clientCom.playGame();
+                if (!clientCom.playGame()) {
+                    out.println("Failed to join the game.");
+                }
                 break;
             case "6": // Observe Game
-                clientCom.observeGame();
+                if (!clientCom.observeGame()) {
+                    out.println("Failed to observe the game.");
+                }
                 break;
         }
     }
-
-
 
     private boolean isValidInput(String input, int max) {
         if (!isNumeric(input)) {
