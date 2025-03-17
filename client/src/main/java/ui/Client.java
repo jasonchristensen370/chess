@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import net.ClientCommunicator;
 
+import static ui.InputChecker.isNotValidInput;
+
 // Draws the Menu
 public class Client {
 
@@ -41,7 +43,7 @@ public class Client {
             out.print("\n[LOGGED OUT] >>> ");
             Scanner scanner = new Scanner(System.in);
             String input = scanner.nextLine();
-            if (!isValidInput(input, 4)) {
+            if (isNotValidInput(input, 4)) {
                 out.println("\nPlease input valid menu option number");
                 continue;
             }
@@ -64,7 +66,7 @@ public class Client {
                 exit=true;
                 break;
             case "4":
-                out.println("\nEnter one of the option numbers to get started.");
+                out.println("\nEnter the number of one of the options to get started.");
         }
     }
 
@@ -74,7 +76,7 @@ public class Client {
             out.print("\n[LOGGED IN] >>> ");
             Scanner scanner = new Scanner(System.in);
             String input = scanner.nextLine();
-            if (!isValidInput(input, 6)) {
+            if (isNotValidInput(input, 6)) {
                 out.println("\nPlease input valid menu option number");
                 continue;
             }
@@ -86,7 +88,8 @@ public class Client {
     private void evalPostLogin(String input) {
         switch(input) {
             case "1": // Help
-                out.println("\nEnter one of the option numbers to get started.");
+                out.println("\nEnter the number of the option you wish to select.");
+                break;
             case "2": // Logout
                 loggedIn = !clientCom.logout();
                 break;
@@ -105,20 +108,5 @@ public class Client {
         }
     }
 
-    private boolean isValidInput(String input, int max) {
-        if (!isNumeric(input)) {
-            return false;
-        }
-        int num = Integer.parseInt(input);
-        return num >= 1 && num <= max;
-    }
 
-    private boolean isNumeric(String input) {
-        try {
-            Integer.parseInt(input);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
 }

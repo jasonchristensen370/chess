@@ -1,10 +1,11 @@
 package net;
 
-import chess.ChessGame;
 import chess.ChessGame.TeamColor;
 import exception.ResponseException;
 import model.GameData;
 import servicemodel.*;
+import static ui.InputChecker.isNotValidInput;
+
 import static ui.EscapeSequences.*;
 
 import java.io.PrintStream;
@@ -18,14 +19,14 @@ public class ClientCommunicator {
     Scanner scanner;
     PrintStream out;
     String authToken;
-    HashMap<Integer, Integer> listGameIDs;
+    HashMap<Integer, GameData> listGameData;
 
     public ClientCommunicator() {
         serverFacade = new ServerFacade(8080);
         scanner = new Scanner(System.in);
         out = new PrintStream(System.out);
         authToken = null;
-        listGameIDs = new HashMap<>();
+        listGameData = new HashMap<>();
     }
 
     public boolean register() {
@@ -104,8 +105,9 @@ public class ClientCommunicator {
 
     private void printGameList(ArrayList<GameData> games) {
         int counter = 1;
+        out.println();
         for (var game : games) {
-            listGameIDs.put(counter, game.gameID());
+            listGameData.put(counter, game);
             printGame(game, counter);
             counter++;
         }
@@ -125,11 +127,11 @@ public class ClientCommunicator {
             Integer gameNum = Integer.parseInt(scanner.nextLine());
             out.print("Please Input Color to Play (WHITE/BLACK): ");
             String color = scanner.nextLine();
-            int gameID = listGameIDs.get(gameNum);
-            var req = new JoinGameRequest(authToken, color, gameID);
+            GameData game = listGameData.get(gameNum);
+            var req = new JoinGameRequest(authToken, color, game.gameID());
             serverFacade.joinGame(req);
             TeamColor teamColor = color.equalsIgnoreCase("WHITE") ? TeamColor.WHITE : TeamColor.BLACK;
-            ui.ChessBoardGraphics.drawChessBoard(new ChessGame(), teamColor);
+            ui.ChessBoardGraphics.drawChessBoard(game.game(), teamColor);
             // Display board until they press enter
             scanner.nextLine();
         } catch (ResponseException e) {
@@ -140,7 +142,11 @@ public class ClientCommunicator {
     public void observeGame() {
         out.print("Please Input Game Number to Observe: ");
         String gameNum = scanner.nextLine();
-        ui.ChessBoardGraphics.drawChessBoard(new ChessGame(), TeamColor.WHITE);
+        if (isNotValidInput(gameNum, listGameData.size())) {
+            out.println("Please input valid game number in list");
+            return;
+        }
+        ui.ChessBoardGraphics.drawChessBoard(listGameData.get(Integer.parseInt(gameNum)).game(), TeamColor.WHITE);
         // Display board until they press enter
         scanner.nextLine();
         // If you can't observe it, print error message
