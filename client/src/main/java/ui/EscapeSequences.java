@@ -76,4 +76,10 @@ public class EscapeSequences {
 //    public static final String EMPTY = "   ";
 
     public static String moveCursorToLocation(int x, int y) { return UNICODE_ESCAPE + "[" + y + ";" + x + "H"; }
+
+    public static final String SET_MENU_TEXT = SET_TEXT_BOLD+SET_TEXT_COLOR_BLUE;
+    public static final String SET_ERROR_TEXT = SET_TEXT_BOLD+SET_TEXT_COLOR_RED;
+    public static final String SET_MESSAGE_TEXT = SET_TEXT_BOLD+SET_TEXT_COLOR_MAGENTA;
+    public static final String SET_PROMPT_TEXT = SET_TEXT_BOLD+SET_TEXT_COLOR_GREEN;
+    public static final String RESET_TEXT = RESET_TEXT_BOLD_FAINT+RESET_TEXT_COLOR+RESET_TEXT_ITALIC+RESET_TEXT_UNDERLINE;
 }

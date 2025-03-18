@@ -4,13 +4,13 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import net.ClientCommunicator;
+import static ui.EscapeSequences.*;
 
 import static ui.InputChecker.isNotValidInput;
 
 // Draws the Menu
 public class Client {
 
-//    private static final String BG = SET_BG_COLOR_BLACK;
     private boolean loggedIn;
     private boolean exit;
     PrintStream out;
@@ -28,23 +28,23 @@ public class Client {
         displayWelcome();
         preLoginMenu();
         if (exit) {
-            out.print("Bye!");
+            out.print(SET_MESSAGE_TEXT+"Bye!"+RESET_TEXT);
         }
     }
 
     private void displayWelcome() {
 //        out.print(BG);
-        out.println("Welcome to 240 chess. Register or login to get started.");
+        out.println(SET_MESSAGE_TEXT+"Welcome to 240 chess. Register or login to get started."+RESET_TEXT);
     }
 
     private void preLoginMenu() {
         while (!loggedIn && !exit) {
-            out.println("\n1. Register\n2. Login\n3. Quit\n4. Help");
+            out.println(SET_MENU_TEXT+"\n1. Register\n2. Login\n3. Quit\n4. Help"+RESET_TEXT);
             out.print("\n[LOGGED OUT] >>> ");
             Scanner scanner = new Scanner(System.in);
             String input = scanner.nextLine();
             if (isNotValidInput(input, 4)) {
-                out.println("\nPlease input valid menu option number");
+                out.println(SET_ERROR_TEXT+"\nPlease input valid menu option number"+RESET_TEXT);
                 continue;
             }
             evalPreLogin(input);
@@ -66,18 +66,18 @@ public class Client {
                 exit=true;
                 break;
             case "4":
-                out.println("\nEnter the number of one of the options to get started.");
+                out.println(SET_MESSAGE_TEXT+"\nEnter the number of one of the options to get started."+RESET_TEXT);
         }
     }
 
     private void postLoginMenu() {
         while (loggedIn) {
-            out.println("\n1. Help\n2. Logout\n3. Create Game\n4. List Games\n5. Play Game\n6. Observe Game");
+            out.println(SET_MENU_TEXT+"\n1. Help\n2. Logout\n3. Create Game\n4. List Games\n5. Play Game\n6. Observe Game"+RESET_TEXT);
             out.print("\n[LOGGED IN] >>> ");
             Scanner scanner = new Scanner(System.in);
             String input = scanner.nextLine();
             if (isNotValidInput(input, 6)) {
-                out.println("\nPlease input valid menu option number");
+                out.println(SET_ERROR_TEXT+"\nPlease input valid menu option number"+RESET_TEXT);
                 continue;
             }
             evalPostLogin(input);
@@ -88,7 +88,7 @@ public class Client {
     private void evalPostLogin(String input) {
         switch(input) {
             case "1": // Help
-                out.println("\nEnter the number of the option you wish to select.");
+                out.println(SET_MESSAGE_TEXT+"\nEnter the number of the option you wish to select."+RESET_TEXT);
                 break;
             case "2": // Logout
                 loggedIn = !clientCom.logout();

@@ -42,7 +42,7 @@ public class ClientCommunicator {
             authToken = res.authToken();
             return res.authToken() != null;
         } catch (ResponseException e) {
-            out.println("\nFailed to register, please try again:");
+            out.println(SET_ERROR_TEXT+"\nFailed to register, please try again:"+RESET_TEXT);
             return false;
         }
     }
@@ -58,7 +58,7 @@ public class ClientCommunicator {
             authToken = res.authToken();
             return res.authToken() != null;
         } catch (ResponseException e) {
-            out.println("\nUsername or password incorrect, please try again:");
+            out.println(SET_ERROR_TEXT+"\nUsername or password incorrect, please try again:"+RESET_TEXT);
             return false;
         }
     }
@@ -70,7 +70,7 @@ public class ClientCommunicator {
             authToken = null;
             return res.message() == null;
         } catch (ResponseException e) {
-            out.println("\nFailed to logout.");
+            out.println(SET_ERROR_TEXT+"\nFailed to logout."+RESET_TEXT);
             return false;
         }
     }
@@ -85,7 +85,7 @@ public class ClientCommunicator {
                 out.println("\nGame Created!");
             }
         } catch (ResponseException e) {
-            out.println("\nGame was not created.");
+            out.println(SET_ERROR_TEXT+"\nGame was not created."+RESET_TEXT);
         }
     }
 
@@ -99,13 +99,13 @@ public class ClientCommunicator {
                 printGameList(res.games());
             }
         } catch (ResponseException e) {
-            out.println("Failed to list games.");
+            out.println(SET_ERROR_TEXT+"Failed to list games."+RESET_TEXT);
         }
     }
 
     private void printGameList(ArrayList<GameData> games) {
         int counter = 1;
-        out.println();
+        out.println(SET_MESSAGE_TEXT+SET_TEXT_UNDERLINE+"\nLIST OF GAMES"+RESET_TEXT);
         for (var game : games) {
             listGameData.put(counter, game);
             printGame(game, counter);
@@ -135,7 +135,7 @@ public class ClientCommunicator {
             // Display board until they press enter
             scanner.nextLine();
         } catch (ResponseException e) {
-            out.println("Failed to join the game.");
+            out.println(SET_ERROR_TEXT+"Failed to join the game."+RESET_TEXT);
         }
     }
 
@@ -143,7 +143,7 @@ public class ClientCommunicator {
         out.print("Please Input Game Number to Observe: ");
         String gameNum = scanner.nextLine();
         if (isNotValidInput(gameNum, listGameData.size())) {
-            out.println("Please input valid game number in list");
+            out.println(SET_ERROR_TEXT+"Please input valid game number in list"+RESET_TEXT);
             return;
         }
         ui.ChessBoardGraphics.drawChessBoard(listGameData.get(Integer.parseInt(gameNum)).game(), TeamColor.WHITE);
