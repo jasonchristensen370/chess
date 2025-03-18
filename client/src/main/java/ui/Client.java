@@ -6,7 +6,7 @@ import java.util.Scanner;
 import net.ClientCommunicator;
 import static ui.EscapeSequences.*;
 
-import static ui.InputChecker.isNotValidInput;
+import static ui.InputChecker.isNotValidMenuInput;
 
 // Draws the Menu
 public class Client {
@@ -33,7 +33,6 @@ public class Client {
     }
 
     private void displayWelcome() {
-//        out.print(BG);
         out.println(SET_MESSAGE_TEXT+"Welcome to 240 chess. Register or login to get started."+RESET_TEXT);
     }
 
@@ -43,7 +42,7 @@ public class Client {
             out.print("\n[LOGGED OUT] >>> ");
             Scanner scanner = new Scanner(System.in);
             String input = scanner.nextLine();
-            if (isNotValidInput(input, 4)) {
+            if (isNotValidMenuInput(input, 4)) {
                 out.println(SET_ERROR_TEXT+"\nPlease input valid menu option number"+RESET_TEXT);
                 continue;
             }
@@ -76,7 +75,7 @@ public class Client {
             out.print("\n[LOGGED IN] >>> ");
             Scanner scanner = new Scanner(System.in);
             String input = scanner.nextLine();
-            if (isNotValidInput(input, 6)) {
+            if (isNotValidMenuInput(input, 6)) {
                 out.println(SET_ERROR_TEXT+"\nPlease input valid menu option number"+RESET_TEXT);
                 continue;
             }

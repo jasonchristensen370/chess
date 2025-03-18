@@ -4,8 +4,8 @@ import chess.ChessGame.TeamColor;
 import exception.ResponseException;
 import model.GameData;
 import servicemodel.*;
-import static ui.InputChecker.isNotValidInput;
 
+import static ui.InputChecker.*;
 import static ui.EscapeSequences.*;
 
 import java.io.PrintStream;
@@ -31,34 +31,58 @@ public class ClientCommunicator {
 
     public boolean register() {
         try {
-            out.print("Please Input Username: ");
+            printPrompt("Please Input Username");
             String username = scanner.nextLine();
-            out.print("Please Input Password: ");
+            if (username.isEmpty()) {
+                printError("\nUsername cannot be empty");
+                return false;
+            }
+            printPrompt("Please Input Password");
             String password = scanner.nextLine();
+            if (password.isEmpty()) {
+                printError("\nPassword cannot be empty");
+                return false;
+            }
             out.print("Please Input Email: ");
             String email = scanner.nextLine();
+            if (email.isEmpty()) {
+                printError("\nEmail cannot be empty");
+                return false;
+            }
             var req = new RegisterRequest(username, password, email);
             RegisterResult res = serverFacade.register(req);
             authToken = res.authToken();
-            return res.authToken() != null;
+            return true;
         } catch (ResponseException e) {
-            out.println(SET_ERROR_TEXT+"\nFailed to register, please try again:"+RESET_TEXT);
+            if (e.statusCode()==403) {
+                printError("\nUsername already taken, please try again");
+            } else {
+                printError("\nFailed to register, please try again");
+            }
             return false;
         }
     }
 
     public boolean login() {
         try {
-            out.print("Please Input Username: ");
+            printPrompt("Please Input Username");
             String username = scanner.nextLine();
-            out.print("Please Input Password: ");
+            if (isNotValidStringInput(username)) {
+                printError("\nUsername cannot be empty");
+                return false;
+            }
+            printPrompt("Please Input Password");
             String password = scanner.nextLine();
+            if (isNotValidStringInput(password)) {
+                printError("\nPassword cannot be empty");
+                return false;
+            }
             var req = new LoginRequest(username, password);
             LoginResult res = serverFacade.login(req);
             authToken = res.authToken();
             return res.authToken() != null;
         } catch (ResponseException e) {
-            out.println(SET_ERROR_TEXT+"\nUsername or password incorrect, please try again:"+RESET_TEXT);
+            printError("\nUsername or password incorrect, please try again");
             return false;
         }
     }
@@ -66,26 +90,30 @@ public class ClientCommunicator {
     public boolean logout() {
         try {
             LogoutRequest req = new LogoutRequest(authToken);
-            LogoutResult res = serverFacade.logout(req);
+            serverFacade.logout(req);
             authToken = null;
-            return res.message() == null;
+            printMessage("\nLogged out successfully");
+            return true;
         } catch (ResponseException e) {
-            out.println(SET_ERROR_TEXT+"\nFailed to logout."+RESET_TEXT);
+            printError("\nFailed to logout");
             return false;
         }
     }
 
     public void createGame() {
         try {
-            out.print("Please Input Game Name: ");
+            printPrompt("Please Input Game Name");
             String gameName = scanner.nextLine();
+            if (isNotValidStringInput(gameName)) {
+                printError("\nGame Name cannot be empty");
+            }
             CreateGameRequest req = new CreateGameRequest(authToken, gameName);
             CreateGameResult res = serverFacade.createGame(req);
             if (res.message() == null) {
-                out.println("\nGame Created!");
+                printMessage("\nGame Created!");
             }
         } catch (ResponseException e) {
-            out.println(SET_ERROR_TEXT+"\nGame was not created."+RESET_TEXT);
+            printError("\nGame was not created.");
         }
     }
 
@@ -94,12 +122,12 @@ public class ClientCommunicator {
             var req = new ListRequest(authToken);
             var res = serverFacade.listGames(req);
             if (res.games() == null || res.games().isEmpty()) {
-                out.println("\nThere are no games to list.");
+                printMessage("\nThere are no games to list");
             } else {
                 printGameList(res.games());
             }
         } catch (ResponseException e) {
-            out.println(SET_ERROR_TEXT+"Failed to list games."+RESET_TEXT);
+            printError("\nFailed to list games");
         }
     }
 
@@ -122,11 +150,20 @@ public class ClientCommunicator {
 
     public void playGame() {
         try {
-            out.print("Please Input Game Number to Join: ");
+            printPrompt("Please Input Game Number to Join");
             // TODO: Add error handling for bad input
-            Integer gameNum = Integer.parseInt(scanner.nextLine());
-            out.print("Please Input Color to Play (WHITE/BLACK): ");
+            String gameNumString = scanner.nextLine();
+            if (isNotValidMenuInput(gameNumString, listGameData.size())) {
+                printError("\nPlease input valid game number in list");
+                return;
+            }
+            int gameNum = Integer.parseInt(gameNumString);
+            printPrompt("Please Input Color to Play (WHITE/BLACK)");
             String color = scanner.nextLine();
+            if (!color.equalsIgnoreCase("WHITE") && !color.equalsIgnoreCase("BLACK")) {
+                printError("\nPlease choose valid player color (WHITE/BLACK)");
+                return;
+            }
             GameData game = listGameData.get(gameNum);
             var req = new JoinGameRequest(authToken, color, game.gameID());
             serverFacade.joinGame(req);
@@ -135,21 +172,36 @@ public class ClientCommunicator {
             // Display board until they press enter
             scanner.nextLine();
         } catch (ResponseException e) {
-            out.println(SET_ERROR_TEXT+"Failed to join the game."+RESET_TEXT);
+            if (e.statusCode() == 403) {
+                printError("\nPlayer color already taken");
+            } else {
+                printError("\nFailed to join the game");
+            }
         }
     }
 
     public void observeGame() {
-        out.print("Please Input Game Number to Observe: ");
-        String gameNum = scanner.nextLine();
-        if (isNotValidInput(gameNum, listGameData.size())) {
-            out.println(SET_ERROR_TEXT+"Please input valid game number in list"+RESET_TEXT);
+        printPrompt("Please Input Game Number to Observe");
+        String gameNumString = scanner.nextLine();
+        if (isNotValidMenuInput(gameNumString, listGameData.size())) {
+            printError("\nPlease input valid game number in list");
             return;
         }
-        ui.ChessBoardGraphics.drawChessBoard(listGameData.get(Integer.parseInt(gameNum)).game(), TeamColor.WHITE);
+        int gameNum = Integer.parseInt(gameNumString);
+        ui.ChessBoardGraphics.drawChessBoard(listGameData.get(gameNum).game(), TeamColor.WHITE);
         // Display board until they press enter
         scanner.nextLine();
-        // If you can't observe it, print error message
-        // out.println("Failed to observe the game.");
+    }
+
+    private void printError(String text) {
+        out.println(SET_ERROR_TEXT+text+RESET_TEXT);
+    }
+
+    private void printMessage(String text) {
+        out.println(SET_MESSAGE_TEXT+text+RESET_TEXT);
+    }
+
+    private void printPrompt(String text) {
+        out.print(text+": ");
     }
 }
