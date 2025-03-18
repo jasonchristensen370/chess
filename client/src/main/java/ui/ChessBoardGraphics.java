@@ -15,12 +15,14 @@ import static ui.EscapeSequences.*;
 public class ChessBoardGraphics {
     private static final String TERMINAL_COLOR = RESET_BG_COLOR;
     private static final String SET_BG_BORDER = SET_BG_COLOR_BLACK+SET_TEXT_COLOR_WHITE+SET_TEXT_BOLD;
+    private static final String WHITE_SQUARE_COLOR = SET_BG_COLOR_LIGHT_GREY;
+    private static final String BLACK_SQUARE_COLOR = SET_BG_COLOR_DARK_GREEN;
 
     private static ChessBoard board;
 
     // Throw this away later, client will call methods in this class.
     public static void main(String[] args) {
-        drawChessBoard(new ChessGame(), TeamColor.WHITE);
+        drawChessBoard(new ChessGame(), TeamColor.BLACK);
     }
 
     public static void drawChessBoard(ChessGame game, TeamColor color) {
@@ -59,33 +61,26 @@ public class ChessBoardGraphics {
             ChessPosition pos = new ChessPosition(row, col);
             if (row % 2 == 0) {
                 if (col % 2 == 1) {
-                    drawWhiteSquare(out, pos);
+                    drawSquare(out, pos, WHITE_SQUARE_COLOR);
                 } else {
-                    drawBlackSquare(out, pos);
+                    drawSquare(out, pos, BLACK_SQUARE_COLOR);
                 }
             } else {
                 if (col % 2 == 1) {
-                    drawBlackSquare(out, pos);
+                    drawSquare(out, pos, BLACK_SQUARE_COLOR);
                 } else {
-                    drawWhiteSquare(out, pos);
+                    drawSquare(out, pos, WHITE_SQUARE_COLOR);
                 }
             }
         }
         out.println(SET_BG_BORDER+" "+row+" "+TERMINAL_COLOR);
     }
 
-    public static void drawWhiteSquare(PrintStream out, ChessPosition pos) {
+    public static void drawSquare(PrintStream out, ChessPosition pos, String squareColor) {
         ChessPiece piece = board.getPiece(pos);
         String pieceString = getPieceString(piece);
         String textColor = getPieceTextColor(piece);
-        out.print(SET_BG_COLOR_LIGHT_GREY+textColor+pieceString);
-    }
-
-    public static void drawBlackSquare(PrintStream out, ChessPosition pos) {
-        ChessPiece piece = board.getPiece(pos);
-        String pieceString = getPieceString(piece);
-        String textColor = getPieceTextColor(piece);
-        out.print(SET_BG_COLOR_DARK_GREEN+textColor+pieceString);
+        out.print(squareColor+textColor+pieceString);
     }
 
     private static String getPieceString(ChessPiece piece) {
