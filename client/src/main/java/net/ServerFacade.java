@@ -48,6 +48,7 @@ public class ServerFacade {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setReadTimeout(5000);
             http.setRequestMethod(method);
             http.setDoOutput(true);
 

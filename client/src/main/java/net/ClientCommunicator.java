@@ -80,6 +80,7 @@ public class ClientCommunicator {
             var req = new LoginRequest(username, password);
             LoginResult res = serverFacade.login(req);
             authToken = res.authToken();
+            printMessage("\nLogged in successfully as "+res.username());
             return res.authToken() != null;
         } catch (ResponseException e) {
             printError("\nUsername or password incorrect, please try again");
@@ -151,7 +152,6 @@ public class ClientCommunicator {
     public void playGame() {
         try {
             printPrompt("Please Input Game Number to Join");
-            // TODO: Add error handling for bad input
             String gameNumString = scanner.nextLine();
             if (isNotValidMenuInput(gameNumString, listGameData.size())) {
                 printError("\nPlease input valid game number in list");
@@ -181,7 +181,8 @@ public class ClientCommunicator {
     }
 
     public void observeGame() {
-        printPrompt("Please Input Game Number to Observe");
+        listGames();
+        printPrompt("\nPlease Input Game Number to Observe");
         String gameNumString = scanner.nextLine();
         if (isNotValidMenuInput(gameNumString, listGameData.size())) {
             printError("\nPlease input valid game number in list");
