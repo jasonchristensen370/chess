@@ -113,7 +113,7 @@ public class Service {
                 return new JoinGameResult("Error: unauthorized");
             }
             GameData gameData = gameDAO.getGame(req.gameID());
-            if (gameData == null || !allowedColors.contains(req.playerColor())) {
+            if (gameData == null || !allowedColors.contains(req.playerColor().toUpperCase())) {
                 return new JoinGameResult("Error: bad request");
             }
             if (playerColorTaken(req.playerColor(), gameData)) {
