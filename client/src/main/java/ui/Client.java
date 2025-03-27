@@ -269,7 +269,7 @@ public class Client {
             if (e.statusCode() == 403) {
                 printError("\nPlayer color already taken");
             } else {
-                printError("\nFailed to join the game");
+                printError(e.statusCode()+"\nFailed to join the game");
             }
         }
     }
