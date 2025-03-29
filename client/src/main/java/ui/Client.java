@@ -13,6 +13,7 @@ import exception.ResponseException;
 import model.GameData;
 import net.ServerFacade;
 import servicemodel.*;
+import websocket.messages.ServerMessage;
 
 import static ui.EscapeSequences.*;
 
@@ -20,10 +21,12 @@ import static ui.InputChecker.isNotValidMenuInput;
 import static ui.InputChecker.isNotValidStringInput;
 
 // Draws the Menu
-public class Client {
+public class Client implements ServerMessageObserver {
 
     private boolean loggedIn;
     private boolean inGame;
+    private boolean observingGame;
+    private boolean playingGame;
     private boolean exit;
     private final PrintStream out;
     private final ServerFacade serverFacade;
@@ -36,6 +39,8 @@ public class Client {
     public Client() {
         loggedIn = false;
         inGame = false;
+        observingGame = false;
+        playingGame = false;
         exit = false;
         out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
@@ -121,10 +126,12 @@ public class Client {
                 break;
             case "5": // Play Game
                 inGame = true;
+                playingGame = true;
                 playGame();
                 break;
             case "6": // Observe Game
                 inGame = true;
+                observingGame = true;
                 observeGame();
                 break;
         }
@@ -340,17 +347,26 @@ public class Client {
     private void leaveGame() {
         printMessage("\nSuccessfully left \""+gameData.gameName()+"\"");
         inGame = false;
+        observingGame = false;
+        playingGame = false;
         gameData = null;
         teamColor = null;
     }
 
     private void resign() {
+        if (observingGame) {
+            printError("\n Observers cannot resign.");
+        }
         printPrompt("\nAre you sure you want to resign? (y/n)");
         String in = scanner.nextLine();
         if (!in.isEmpty() && !in.equalsIgnoreCase("y")) {
             return;
         }
         // TODO: Implement Game Over Logic
+    }
+
+    public void notify(ServerMessage message) {
+
     }
 
     private void highlightLegalMoves() {
