@@ -42,7 +42,7 @@ public class ChessBoardGraphics {
         resetTextSettings(out);
     }
 
-    public static void drawHeader(PrintStream out, TeamColor color) {
+    private static void drawHeader(PrintStream out, TeamColor color) {
         out.print(SET_BG_BORDER);
         if (color == TeamColor.WHITE) {
             out.println(EMPTY+" a  b  c  d  e  f  g  h "+EMPTY+TERMINAL_COLOR);
@@ -51,7 +51,7 @@ public class ChessBoardGraphics {
         }
     }
 
-    public static void drawRow(PrintStream out, int row, TeamColor color) {
+    private static void drawRow(PrintStream out, int row, TeamColor color) {
         out.print(SET_BG_BORDER+" "+row+" ");
         boolean countdown = color != TeamColor.WHITE;
         int start = countdown ? 8 : 1;
@@ -76,7 +76,7 @@ public class ChessBoardGraphics {
         out.println(SET_BG_BORDER+" "+row+" "+TERMINAL_COLOR);
     }
 
-    public static void drawSquare(PrintStream out, ChessPosition pos, String squareColor) {
+    private static void drawSquare(PrintStream out, ChessPosition pos, String squareColor) {
         ChessPiece piece = board.getPiece(pos);
         String pieceString = getPieceString(piece);
         String textColor = getPieceTextColor(piece);
