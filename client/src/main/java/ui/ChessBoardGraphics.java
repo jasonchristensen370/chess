@@ -1,13 +1,12 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
+import chess.*;
 import chess.ChessGame.TeamColor;
-import chess.ChessPiece;
-import chess.ChessPosition;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static ui.EscapeSequences.*;
 
@@ -17,17 +16,25 @@ public class ChessBoardGraphics {
     private static final String SET_BG_BORDER = SET_BG_COLOR_BLACK+SET_TEXT_COLOR_WHITE+SET_TEXT_BOLD;
     private static final String WHITE_SQUARE_COLOR = SET_BG_COLOR_LIGHT_GREY;
     private static final String BLACK_SQUARE_COLOR = SET_BG_COLOR_DARK_GREEN;
+    private static final String WHITE_HIGHLIGHT = SET_BG_COLOR_GREEN;
+    private static final String BLACK_HIGHLIGHT = SET_BG_COLOR_SEA_GREEN;
+    private static final String PIECE_HIGHLIGHT = SET_BG_COLOR_BLUE;
 
     private static ChessBoard board;
+    private static ChessPosition highPos;
+    private static final ArrayList<ChessPosition> validMoves = new ArrayList<>();
 
     // Throw this away later, client will call methods in this class.
     public static void main(String[] args) {
-        drawChessBoard(new ChessGame(), TeamColor.BLACK);
+//        var highlight = new ChessPosition(2, 4);
+        drawChessBoard(new ChessGame(), TeamColor.WHITE, null);
     }
 
-    public static void drawChessBoard(ChessGame game, TeamColor color) {
+    public static void drawChessBoard(ChessGame game, TeamColor color, ChessPosition highlightPosition) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         board = game.getBoard();
+        highPos = highlightPosition;
+        getValidMoves();
         drawHeader(out, color);
 
         boolean countdown = color == TeamColor.WHITE;
@@ -40,6 +47,15 @@ public class ChessBoardGraphics {
 
         drawHeader(out, color);
         resetTextSettings(out);
+    }
+
+    private static void getValidMoves() {
+        if (highPos != null) {
+            Collection<ChessMove> validMovements = board.getPiece(highPos).pieceMoves(board, highPos);
+            for (ChessMove move : validMovements) {
+                validMoves.add(move.getEndPosition());
+            }
+        }
     }
 
     private static void drawHeader(PrintStream out, TeamColor color) {
@@ -59,17 +75,19 @@ public class ChessBoardGraphics {
         int step = countdown ? -1 : 1;
         for (int col=start; countdown ? col>=end : col<=end;  col += step) {
             ChessPosition pos = new ChessPosition(row, col);
+            String whiteColor = validMoves.contains(pos) ? WHITE_HIGHLIGHT : WHITE_SQUARE_COLOR;
+            String blackColor = validMoves.contains(pos) ? BLACK_HIGHLIGHT : BLACK_SQUARE_COLOR;
             if (row % 2 == 0) {
                 if (col % 2 == 1) {
-                    drawSquare(out, pos, WHITE_SQUARE_COLOR);
+                    drawSquare(out, pos, whiteColor);
                 } else {
-                    drawSquare(out, pos, BLACK_SQUARE_COLOR);
+                    drawSquare(out, pos, blackColor);
                 }
             } else {
                 if (col % 2 == 1) {
-                    drawSquare(out, pos, BLACK_SQUARE_COLOR);
+                    drawSquare(out, pos, blackColor);
                 } else {
-                    drawSquare(out, pos, WHITE_SQUARE_COLOR);
+                    drawSquare(out, pos, whiteColor);
                 }
             }
         }
@@ -80,6 +98,9 @@ public class ChessBoardGraphics {
         ChessPiece piece = board.getPiece(pos);
         String pieceString = getPieceString(piece);
         String textColor = getPieceTextColor(piece);
+        if (pos.equals(highPos)) {
+            squareColor = PIECE_HIGHLIGHT;
+        }
         out.print(squareColor+textColor+pieceString);
     }
 
