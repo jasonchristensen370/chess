@@ -21,45 +21,45 @@ import static ui.InputChecker.isNotValidStringInput;
 public class Client {
 
     private boolean loggedIn;
+    private boolean inGame;
     private boolean exit;
-    PrintStream out;
-
-    ServerFacade serverFacade;
-    Scanner scanner;
-    String authToken;
-    HashMap<Integer, GameData> listGameData;
+    private final PrintStream out;
+    private final ServerFacade serverFacade;
+    private final Scanner scanner;
+    private String authToken;
+    private final HashMap<Integer, GameData> gameDataList;
 
     public Client() {
         loggedIn = false;
+        inGame = false;
         exit = false;
         out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
         serverFacade = new ServerFacade(8080);
         scanner = new Scanner(System.in);
         authToken = null;
-        listGameData = new HashMap<>();
+        gameDataList = new HashMap<>();
     }
 
     public void run() {
         displayWelcome();
         preLoginMenu();
         if (exit) {
-            out.print(SET_MESSAGE_TEXT+"Bye!"+RESET_TEXT);
+            printMessage("Bye!");
         }
     }
 
     private void displayWelcome() {
-        out.println(SET_MESSAGE_TEXT+"Welcome to 240 chess. Register or login to get started."+RESET_TEXT);
+        printMessage("Welcome to 240 chess. Register or login to get started.");
     }
 
     private void preLoginMenu() {
         while (!loggedIn && !exit) {
-            out.println(SET_MENU_TEXT+"\n1. Register\n2. Login\n3. Quit\n4. Help"+RESET_TEXT);
+            printMenu("\n1. Register\n2. Login\n3. Quit\n4. Help");
             out.print("\n[LOGGED OUT] >>> ");
-            Scanner scanner = new Scanner(System.in);
             String input = scanner.nextLine();
             if (isNotValidMenuInput(input, 4)) {
-                out.println(SET_ERROR_TEXT+"\nPlease input valid menu option number"+RESET_TEXT);
+                printError("\nPlease input valid menu option number");
                 continue;
             }
             evalPreLogin(input);
@@ -71,28 +71,27 @@ public class Client {
 
     private void evalPreLogin(String input) {
         switch(input) {
-            case "1":
+            case "1": // Register
                 loggedIn = register();
                 break;
-            case "2":
+            case "2": // Login
                 loggedIn = login();
                 break;
-            case "3":
+            case "3": // Quit
                 exit=true;
                 break;
-            case "4":
-                out.println(SET_MESSAGE_TEXT+"\nEnter the number of one of the options to get started."+RESET_TEXT);
+            case "4": // Help
+                help();
         }
     }
 
     private void postLoginMenu() {
         while (loggedIn) {
-            out.println(SET_MENU_TEXT+"\n1. Help\n2. Logout\n3. Create Game\n4. List Games\n5. Play Game\n6. Observe Game"+RESET_TEXT);
+            printMenu("\n1. Help\n2. Logout\n3. Create Game\n4. List Games\n5. Play Game\n6. Observe Game");
             out.print("\n[LOGGED IN] >>> ");
-            Scanner scanner = new Scanner(System.in);
             String input = scanner.nextLine();
             if (isNotValidMenuInput(input, 6)) {
-                out.println(SET_ERROR_TEXT+"\nPlease input valid menu option number"+RESET_TEXT);
+                printError("\nPlease input valid menu option number");
                 continue;
             }
             evalPostLogin(input);
@@ -103,7 +102,7 @@ public class Client {
     private void evalPostLogin(String input) {
         switch(input) {
             case "1": // Help
-                out.println(SET_MESSAGE_TEXT+"\nEnter the number of the option you wish to select."+RESET_TEXT);
+                help();
                 break;
             case "2": // Logout
                 loggedIn = !logout();
@@ -115,13 +114,56 @@ public class Client {
                 listGames();
                 break;
             case "5": // Play Game
+                inGame = true;
                 playGame();
                 break;
             case "6": // Observe Game
+                inGame = true;
                 observeGame();
                 break;
         }
     }
+
+    private void gameplayMenu() {
+        while (inGame) {
+            printMenu("\n1. Help\n2. Redraw Chess Board\n3. Leave\n4. Make Move\n5. Resign\n6. Highlight Legal Moves");
+            out.print("\n[LOGGED IN] >>> ");
+            String input = scanner.nextLine();
+            if (isNotValidMenuInput(input, 6)) {
+                printError("\nPlease input valid menu option number");
+                continue;
+            }
+            evalGameplay(input);
+        }
+        postLoginMenu();
+    }
+
+    private void evalGameplay(String input) {
+        switch(input) {
+            case "1": // Help
+                help();
+                break;
+            case "2": // Redraw Chess Board
+
+                break;
+            case "3": // Leave
+                inGame = false;
+                break;
+            case "4": // Make Move
+
+                break;
+            case "5": // Resign
+
+                break;
+            case "6": // Highlight Legal Moves
+
+                break;
+        }
+    }
+
+    // ////////////////////////// //
+    // ////// SERVER CALLS ////// //
+    // ////////////////////////// //
 
     private boolean register() {
         try {
@@ -230,7 +272,7 @@ public class Client {
         int counter = 1;
         out.println(SET_MESSAGE_TEXT+SET_TEXT_UNDERLINE+"\nLIST OF GAMES"+RESET_TEXT);
         for (var game : games) {
-            listGameData.put(counter, game);
+            gameDataList.put(counter, game);
             printGame(game, counter);
             counter++;
         }
@@ -247,7 +289,7 @@ public class Client {
         try {
             printPrompt("Please Input Game Number to Join");
             String gameNumString = scanner.nextLine();
-            if (isNotValidMenuInput(gameNumString, listGameData.size())) {
+            if (isNotValidMenuInput(gameNumString, gameDataList.size())) {
                 printError("\nPlease input valid game number in list");
                 return;
             }
@@ -258,13 +300,15 @@ public class Client {
                 printError("\nPlease choose valid player color (WHITE/BLACK)");
                 return;
             }
-            GameData game = listGameData.get(gameNum);
-            var req = new JoinGameRequest(authToken, color, game.gameID());
+            GameData gameData = gameDataList.get(gameNum);
+            var req = new JoinGameRequest(authToken, color, gameData.gameID());
             serverFacade.joinGame(req);
             ChessGame.TeamColor teamColor = color.equalsIgnoreCase("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-            ui.ChessBoardGraphics.drawChessBoard(game.game(), teamColor);
-            // Display board until they press enter
-            scanner.nextLine();
+            ui.ChessBoardGraphics.drawChessBoard(gameData.game(), teamColor);
+
+            // Start Gameplay UI
+            gameplayMenu();
+
         } catch (ResponseException e) {
             if (e.statusCode() == 403) {
                 printError("\nPlayer color already taken");
@@ -278,14 +322,15 @@ public class Client {
         listGames();
         printPrompt("\nPlease Input Game Number to Observe");
         String gameNumString = scanner.nextLine();
-        if (isNotValidMenuInput(gameNumString, listGameData.size())) {
+        if (isNotValidMenuInput(gameNumString, gameDataList.size())) {
             printError("\nPlease input valid game number in list");
             return;
         }
         int gameNum = Integer.parseInt(gameNumString);
-        ui.ChessBoardGraphics.drawChessBoard(listGameData.get(gameNum).game(), ChessGame.TeamColor.WHITE);
-        // Display board until they press enter
-        scanner.nextLine();
+        ui.ChessBoardGraphics.drawChessBoard(gameDataList.get(gameNum).game(), ChessGame.TeamColor.WHITE);
+
+        // Start Gameplay UI
+        gameplayMenu();
     }
 
     private void printError(String text) {
@@ -298,6 +343,12 @@ public class Client {
 
     private void printPrompt(String text) {
         out.print(text+": ");
+    }
+
+    private void printMenu(String menu) { out.println(SET_MENU_TEXT+menu+RESET_TEXT);}
+
+    private void help() {
+        out.println(SET_MESSAGE_TEXT+"\nEnter the number of the option you wish to select."+RESET_TEXT);
     }
 
 }
