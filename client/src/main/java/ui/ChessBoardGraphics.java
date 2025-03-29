@@ -22,17 +22,20 @@ public class ChessBoardGraphics {
 
     private static ChessBoard board;
     private static ChessPosition highPos;
-    private static final ArrayList<ChessPosition> validMoves = new ArrayList<>();
+    private static ArrayList<ChessPosition> validMoves;
 
     // Throw this away later, client will call methods in this class.
     public static void main(String[] args) {
-//        var highlight = new ChessPosition(2, 4);
-        drawChessBoard(new ChessGame(), TeamColor.WHITE, null);
+        var highlight = new ChessPosition(2, 4);
+        var game = new ChessGame();
+        drawChessBoard(game, TeamColor.WHITE, highlight);
+        drawChessBoard(game, TeamColor.BLACK, null);
     }
 
     public static void drawChessBoard(ChessGame game, TeamColor color, ChessPosition highlightPosition) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         board = game.getBoard();
+        validMoves = new ArrayList<>();
         highPos = highlightPosition;
         getValidMoves();
         drawHeader(out, color);
@@ -47,6 +50,8 @@ public class ChessBoardGraphics {
 
         drawHeader(out, color);
         resetTextSettings(out);
+        highPos = null;
+        validMoves = null;
     }
 
     private static void getValidMoves() {

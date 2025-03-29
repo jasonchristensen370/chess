@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 import chess.ChessGame;
+import chess.ChessGame.TeamColor;
+import chess.ChessPosition;
 import exception.ResponseException;
 import model.GameData;
 import net.ServerFacade;
@@ -28,6 +30,8 @@ public class Client {
     private final Scanner scanner;
     private String authToken;
     private final HashMap<Integer, GameData> gameDataList;
+    private GameData gameData;
+    private TeamColor teamColor;
 
     public Client() {
         loggedIn = false;
@@ -39,13 +43,15 @@ public class Client {
         scanner = new Scanner(System.in);
         authToken = null;
         gameDataList = new HashMap<>();
+        gameData = null;
+        teamColor = null;
     }
 
     public void run() {
         displayWelcome();
         preLoginMenu();
         if (exit) {
-            printMessage("Bye!");
+            printMessage("\nBye!");
         }
     }
 
@@ -125,6 +131,7 @@ public class Client {
     }
 
     private void gameplayMenu() {
+        drawBoard(null);
         while (inGame) {
             printMenu("\n1. Help\n2. Redraw Chess Board\n3. Leave\n4. Make Move\n5. Resign\n6. Highlight Legal Moves");
             out.print("\n[LOGGED IN] >>> ");
@@ -144,26 +151,22 @@ public class Client {
                 help();
                 break;
             case "2": // Redraw Chess Board
-
+                drawBoard(null);
                 break;
             case "3": // Leave
-                inGame = false;
+                leaveGame();
                 break;
             case "4": // Make Move
 
                 break;
             case "5": // Resign
-
+                resign();
                 break;
             case "6": // Highlight Legal Moves
-
+                highlightLegalMoves();
                 break;
         }
     }
-
-    // ////////////////////////// //
-    // ////// SERVER CALLS ////// //
-    // ////////////////////////// //
 
     private boolean register() {
         try {
@@ -287,6 +290,7 @@ public class Client {
 
     private void playGame() {
         try {
+            listGames();
             printPrompt("Please Input Game Number to Join");
             String gameNumString = scanner.nextLine();
             if (isNotValidMenuInput(gameNumString, gameDataList.size())) {
@@ -300,11 +304,10 @@ public class Client {
                 printError("\nPlease choose valid player color (WHITE/BLACK)");
                 return;
             }
-            GameData gameData = gameDataList.get(gameNum);
+            gameData = gameDataList.get(gameNum);
             var req = new JoinGameRequest(authToken, color, gameData.gameID());
             serverFacade.joinGame(req);
-            ChessGame.TeamColor teamColor = color.equalsIgnoreCase("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-            ui.ChessBoardGraphics.drawChessBoard(gameData.game(), teamColor);
+            teamColor = color.equalsIgnoreCase("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
 
             // Start Gameplay UI
             gameplayMenu();
@@ -327,11 +330,58 @@ public class Client {
             return;
         }
         int gameNum = Integer.parseInt(gameNumString);
-        ui.ChessBoardGraphics.drawChessBoard(gameDataList.get(gameNum).game(), ChessGame.TeamColor.WHITE);
+        gameData = gameDataList.get(gameNum);
+        teamColor = TeamColor.WHITE;
 
         // Start Gameplay UI
         gameplayMenu();
     }
+
+    private void leaveGame() {
+        printMessage("\nSuccessfully left \""+gameData.gameName()+"\"");
+        inGame = false;
+        gameData = null;
+        teamColor = null;
+    }
+
+    private void resign() {
+        printPrompt("\nAre you sure you want to resign? (y/n)");
+        String in = scanner.nextLine();
+        if (!in.isEmpty() && !in.equalsIgnoreCase("y")) {
+            return;
+        }
+        // TODO: Implement Game Over Logic
+    }
+
+    private void highlightLegalMoves() {
+        printPrompt("\nInput position to highlight moves for (Ex. b2)");
+        String input = scanner.nextLine();
+        if (isNotValidPosition(input)) {
+            printError("\nPosition must be 2 characters: [Column (letter a-h)][Row (number 1-8)]");
+            return;
+        }
+        ChessPosition pos = parsePosition(input);
+        drawBoard(pos);
+    }
+
+    private ChessPosition parsePosition(String input) {
+        int col = Character.toUpperCase(input.charAt(0)) - 'A' + 1;
+        int row = Character.getNumericValue(input.charAt(1));
+        return new ChessPosition(row, col);
+    }
+
+    private boolean isNotValidPosition(String input) {
+        if (input.length() != 2) {
+            return true;
+        }
+        char col = input.charAt(0);
+        char row = input.charAt(1);
+        return !Character.isAlphabetic(col) || !Character.isDigit(row);
+    }
+
+    // ////////////////////////// //
+    // //// Helper Functions //// //
+    // ////////////////////////// //
 
     private void printError(String text) {
         out.println(SET_ERROR_TEXT+text+RESET_TEXT);
@@ -349,6 +399,10 @@ public class Client {
 
     private void help() {
         out.println(SET_MESSAGE_TEXT+"\nEnter the number of the option you wish to select."+RESET_TEXT);
+    }
+
+    private void drawBoard(ChessPosition pos) {
+        ChessBoardGraphics.drawChessBoard(gameData.game(), teamColor, pos);
     }
 
 }
