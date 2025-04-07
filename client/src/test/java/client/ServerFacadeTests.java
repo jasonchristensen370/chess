@@ -27,7 +27,11 @@ public class ServerFacadeTests {
         server = new Server();
         int port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
-        facade = new ServerFacade(port);
+        try {
+            facade = new ServerFacade(port, null);
+        } catch (ResponseException e) {
+            fail(e.getMessage());
+        }
     }
 
     @BeforeEach

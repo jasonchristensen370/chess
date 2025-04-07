@@ -23,8 +23,8 @@ public class ConnectionManager {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
-                if (!c.visitorName.equals(excludeVisitorName)) {
-                    c.send(message.toString());
+                if (!c.username.equals(excludeVisitorName)) {
+                    c.send(Serializer.toJsonServerMessage(message));
                 }
             } else {
                 removeList.add(c);
@@ -33,7 +33,7 @@ public class ConnectionManager {
 
         // Clean up any connections that were left open.
         for (var c : removeList) {
-            connections.remove(c.visitorName);
+            connections.remove(c.username);
         }
     }
 }

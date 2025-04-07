@@ -13,7 +13,7 @@ import exception.ResponseException;
 import model.GameData;
 import net.ServerFacade;
 import servicemodel.*;
-import websocket.messages.ServerMessage;
+import websocket.messages.*;
 
 import static ui.EscapeSequences.*;
 
@@ -29,7 +29,7 @@ public class Client implements ServerMessageObserver {
     private boolean playingGame;
     private boolean exit;
     private final PrintStream out;
-    private final ServerFacade serverFacade;
+    private ServerFacade serverFacade;
     private final Scanner scanner;
     private String authToken;
     private final HashMap<Integer, GameData> gameDataList;
@@ -43,8 +43,11 @@ public class Client implements ServerMessageObserver {
         playingGame = false;
         exit = false;
         out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-
-        serverFacade = new ServerFacade(8080);
+        try {
+            serverFacade = new ServerFacade(8080, this);
+        } catch (ResponseException e) {
+            out.println(e.getMessage());
+        }
         scanner = new Scanner(System.in);
         authToken = null;
         gameDataList = new HashMap<>();
@@ -138,7 +141,7 @@ public class Client implements ServerMessageObserver {
     }
 
     private void gameplayMenu() {
-        drawBoard(null);
+//        drawBoard(null);
         while (inGame) {
             printMenu("\n1. Help\n2. Redraw Chess Board\n3. Leave\n4. Make Move\n5. Resign\n6. Highlight Legal Moves");
             out.print("\n[LOGGED IN] >>> ");
@@ -316,7 +319,7 @@ public class Client implements ServerMessageObserver {
             serverFacade.joinGame(req);
             teamColor = color.equalsIgnoreCase("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
 
-            // Start Gameplay UI
+//            // Start Gameplay UI
             gameplayMenu();
 
         } catch (ResponseException e) {
@@ -339,6 +342,12 @@ public class Client implements ServerMessageObserver {
         int gameNum = Integer.parseInt(gameNumString);
         gameData = gameDataList.get(gameNum);
         teamColor = TeamColor.WHITE;
+        var req = new JoinGameRequest(authToken, "white", gameData.gameID());
+        try {
+            serverFacade.observeGame(req);
+        } catch (ResponseException e) {
+            printError("Failed to Observe the Game");
+        }
 
         // Start Gameplay UI
         gameplayMenu();
@@ -359,14 +368,40 @@ public class Client implements ServerMessageObserver {
         }
         printPrompt("\nAre you sure you want to resign? (y/n)");
         String in = scanner.nextLine();
+        // Not resigning
         if (!in.isEmpty() && !in.equalsIgnoreCase("y")) {
             return;
         }
+        // Resign
         // TODO: Implement Game Over Logic
     }
 
+    @Override
     public void notify(ServerMessage message) {
-
+        ServerMessage.ServerMessageType type = message.getServerMessageType();
+        switch(type) {
+            case ERROR:
+                ErrorMessage errorMessage = (ErrorMessage) message;
+                printError(errorMessage.getErrorMessage());
+                break;
+            case LOAD_GAME:
+                LoadGameMessage loadGameMessage = (LoadGameMessage) message;
+                gameData = new GameData(gameData.gameID(),
+                                        gameData.whiteUsername(),
+                                        gameData.blackUsername(),
+                                        gameData.gameName(),
+                                        loadGameMessage.getGame());
+//                out.println();
+                drawBoard(null);
+                gameplayMenu();
+                break;
+            case NOTIFICATION:
+                NotificationMessage notificationMessage = (NotificationMessage) message;
+                printMessage(notificationMessage.getMessage());
+                break;
+            default:
+                printError("Something bad happened.");
+        }
     }
 
     private void highlightLegalMoves() {
@@ -396,7 +431,7 @@ public class Client implements ServerMessageObserver {
     }
 
     // ////////////////////////// //
-    // //// Helper Functions //// //
+    // / Helper Print Functions / //
     // ////////////////////////// //
 
     private void printError(String text) {
@@ -418,6 +453,7 @@ public class Client implements ServerMessageObserver {
     }
 
     private void drawBoard(ChessPosition pos) {
+        out.println();
         ChessBoardGraphics.drawChessBoard(gameData.game(), teamColor, pos);
     }
 
