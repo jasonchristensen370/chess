@@ -20,6 +20,7 @@ public class ChessBoardGraphics {
     private static final String BLACK_HIGHLIGHT = SET_BG_COLOR_SEA_GREEN;
     private static final String PIECE_HIGHLIGHT = SET_BG_COLOR_BLUE;
 
+    private static ChessGame game;
     private static ChessBoard board;
     private static ChessPosition highPos;
     private static ArrayList<ChessPosition> validMoves;
@@ -32,8 +33,9 @@ public class ChessBoardGraphics {
         drawChessBoard(game, TeamColor.BLACK, null);
     }
 
-    public static void drawChessBoard(ChessGame game, TeamColor color, ChessPosition highlightPosition) {
+    public static void drawChessBoard(ChessGame chessGame, TeamColor color, ChessPosition highlightPosition) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        game = chessGame;
         board = game.getBoard();
         validMoves = new ArrayList<>();
         highPos = highlightPosition;
@@ -56,9 +58,12 @@ public class ChessBoardGraphics {
 
     private static void getValidMoves() {
         if (highPos != null) {
-            Collection<ChessMove> validMovements = board.getPiece(highPos).pieceMoves(board, highPos);
-            for (ChessMove move : validMovements) {
-                validMoves.add(move.getEndPosition());
+//            Collection<ChessMove> validMovements = board.getPiece(highPos).pieceMoves(board, highPos);
+            Collection<ChessMove> validMovements = game.validMoves(highPos);
+            if (validMovements != null) {
+                for (ChessMove move : validMovements) {
+                    validMoves.add(move.getEndPosition());
+                }
             }
         }
     }
