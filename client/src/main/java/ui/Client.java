@@ -143,8 +143,8 @@ public class Client implements ServerMessageObserver {
     private void gameplayMenu() {
 //        drawBoard(null);
         while (inGame) {
-            printMenu("\n1. Help\n2. Redraw Chess Board\n3. Leave\n4. Make Move\n5. Resign\n6. Highlight Legal Moves");
-            out.print("\n[LOGGED IN] >>> ");
+            printGameMenu();
+//            out.print("\n[LOGGED IN] >>> ");
             String input = scanner.nextLine();
             if (isNotValidMenuInput(input, 6)) {
                 printError("\nPlease input valid menu option number");
@@ -355,6 +355,12 @@ public class Client implements ServerMessageObserver {
 
     private void leaveGame() {
         printMessage("\nSuccessfully left \""+gameData.gameName()+"\"");
+        var req = new JoinGameRequest(authToken, "white", gameData.gameID());
+        try {
+            serverFacade.leaveGame(req);
+        } catch (ResponseException e) {
+            printError("Failed to Observe the Game");
+        }
         inGame = false;
         observingGame = false;
         playingGame = false;
@@ -393,7 +399,8 @@ public class Client implements ServerMessageObserver {
                                         loadGameMessage.getGame());
 //                out.println();
                 drawBoard(null);
-                gameplayMenu();
+//                gameplayMenu();
+                printGameMenu();
                 break;
             case NOTIFICATION:
                 NotificationMessage notificationMessage = (NotificationMessage) message;
@@ -428,6 +435,10 @@ public class Client implements ServerMessageObserver {
         char col = input.charAt(0);
         char row = input.charAt(1);
         return !Character.isAlphabetic(col) || !Character.isDigit(row);
+    }
+
+    private void printGameMenu() {
+        printMenu("\n1. Help\n2. Redraw Chess Board\n3. Leave\n4. Make Move\n5. Resign\n6. Highlight Legal Moves");
     }
 
     // ////////////////////////// //

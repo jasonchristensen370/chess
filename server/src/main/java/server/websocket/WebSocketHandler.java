@@ -99,8 +99,19 @@ public class WebSocketHandler {
 
     }
 
-    private void leaveGame(Session session, String username, UserGameCommand command) {
-
+    private void leaveGame(Session session, String username, UserGameCommand command) throws IOException {
+        var gameID = command.getGameID();
+        connections.get(gameID).remove(username);
+        try {
+            var gameData = gameDAO.getGame(gameID);
+            String color = getPlayerColor(username, gameData);
+            if (!color.equals("observer")) {
+                gameDAO.updateGame(color, gameID, null);
+            }
+            connections.get(gameID).broadcast(username, new NotificationMessage(username+" ("+color+") has left the game"));
+        } catch (DataAccessException e) {
+            sendMessage(session.getRemote(), new ErrorMessage("Error accessing data"));
+        }
     }
 
     private void resign(Session session, String username, UserGameCommand command) {

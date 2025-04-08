@@ -69,4 +69,12 @@ public class ServerFacade {
             throw new ResponseException(500, e.getMessage());
         }
     }
+
+    public void leaveGame(JoinGameRequest req) throws ResponseException {
+        try {
+            websocketCom.leave(authToken, req.gameID());
+        } catch (IOException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
 }
