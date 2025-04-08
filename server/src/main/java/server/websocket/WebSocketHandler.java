@@ -17,12 +17,14 @@ import websocket.messages.*;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
 public class WebSocketHandler {
     private final ConcurrentHashMap<Integer, ConnectionManager> connections = new ConcurrentHashMap<>();
     private final SQLGameDAO gameDAO = new SQLGameDAO();
+    private final ArrayList<Integer> gamesEnded = new ArrayList<>();
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException {
@@ -97,9 +99,19 @@ public class WebSocketHandler {
 
     private void makeMove(Session session, String username, MakeMoveCommand command) throws IOException {
         int gameID = command.getGameID();
+        if (gamesEnded.contains(gameID)) {
+            sendMessage(session.getRemote(), new ErrorMessage("Error: Cannot make move. Game is over."));
+            return;
+        }
         try {
             GameData gameData = gameDAO.getGame(gameID);
             ChessGame chessGame = gameData.game();
+            ChessGame.TeamColor teamTurn = chessGame.getTeamTurn();
+            String color = getPlayerColor(username, gameData);
+            if (!color.equalsIgnoreCase(teamTurn.toString())) {
+                sendMessage(session.getRemote(), new ErrorMessage("Error: It's not your turn."));
+                return;
+            }
             ChessMove move = command.getMove();
             // Update the game
             chessGame.makeMove(move);
@@ -113,12 +125,16 @@ public class WebSocketHandler {
             String message = "";
             if (chessGame.isInCheckmate(chessGame.getTeamTurn())) {
                 message = chessGame.getTeamTurn().toString()+" is in checkmate";
+                gamesEnded.add(gameID);
             } else if (chessGame.isInStalemate(chessGame.getTeamTurn())) {
                 message = chessGame.getTeamTurn().toString()+" is in stalemate";
+                gamesEnded.add(gameID);
             } else if (chessGame.isInCheck(chessGame.getTeamTurn())) {
                 message = chessGame.getTeamTurn().toString()+" is in check";
             }
-            connections.get(gameID).broadcast(null, new NotificationMessage(message));
+            if (!message.isEmpty()) {
+                connections.get(gameID).broadcast(null, new NotificationMessage(message));
+            }
 
         } catch (DataAccessException e) {
             sendMessage(session.getRemote(), new ErrorMessage("Error accessing data"));
@@ -156,10 +172,19 @@ public class WebSocketHandler {
 
     private void resign(Session session, String username, UserGameCommand command) throws IOException {
         var gameID = command.getGameID();
+        if (gamesEnded.contains(gameID)) {
+            sendMessage(session.getRemote(), new ErrorMessage("Cannot resign. Game is over."));
+            return;
+        }
         try {
             var gameData = gameDAO.getGame(gameID);
             String color = getPlayerColor(username, gameData);
+            if (color.equals("observer")) {
+                sendMessage(session.getRemote(), new ErrorMessage("Observers cannot resign."));
+                return;
+            }
             connections.get(gameID).broadcast(null, new NotificationMessage(username+" ("+color+") has resigned"));
+            gamesEnded.add(gameID);
         } catch (DataAccessException e) {
             sendMessage(session.getRemote(), new ErrorMessage("Error accessing data"));
         }
