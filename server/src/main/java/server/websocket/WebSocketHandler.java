@@ -114,7 +114,14 @@ public class WebSocketHandler {
         }
     }
 
-    private void resign(Session session, String username, UserGameCommand command) {
-
+    private void resign(Session session, String username, UserGameCommand command) throws IOException {
+        var gameID = command.getGameID();
+        try {
+            var gameData = gameDAO.getGame(gameID);
+            String color = getPlayerColor(username, gameData);
+            connections.get(gameID).broadcast(null, new NotificationMessage(username+" ("+color+") has resigned"));
+        } catch (DataAccessException e) {
+            sendMessage(session.getRemote(), new ErrorMessage("Error accessing data"));
+        }
     }
 }

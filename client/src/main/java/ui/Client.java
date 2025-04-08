@@ -378,8 +378,12 @@ public class Client implements ServerMessageObserver {
         if (!in.isEmpty() && !in.equalsIgnoreCase("y")) {
             return;
         }
-        // Resign
-        // TODO: Implement Game Over Logic
+        var req = new JoinGameRequest(authToken, "white", gameData.gameID());
+        try {
+            serverFacade.resign(req);
+        } catch (ResponseException e) {
+            printError("Failed to Resign");
+        }
     }
 
     @Override

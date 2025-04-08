@@ -77,4 +77,12 @@ public class ServerFacade {
             throw new ResponseException(500, e.getMessage());
         }
     }
+
+    public void resign(JoinGameRequest req) throws ResponseException {
+        try {
+            websocketCom.resign(authToken, req.gameID());
+        } catch (IOException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
 }
