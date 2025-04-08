@@ -1,5 +1,6 @@
 package net;
 
+import chess.ChessMove;
 import exception.ResponseException;
 import servicemodel.*;
 import ui.ServerMessageObserver;
@@ -11,12 +12,10 @@ public class ServerFacade {
 
     private final HttpCommunicator httpCom;
     private final WebsocketCommunicator websocketCom;
-    private final ServerMessageObserver observer;
     private String authToken = null;
 
     public ServerFacade(int port, ServerMessageObserver observer) throws ResponseException {
         httpCom = new HttpCommunicator("http://localhost:"+port);
-        this.observer = observer;
         websocketCom = new WebsocketCommunicator("ws://localhost:"+port, observer);
     }
 
@@ -81,6 +80,14 @@ public class ServerFacade {
     public void resign(JoinGameRequest req) throws ResponseException {
         try {
             websocketCom.resign(authToken, req.gameID());
+        } catch (IOException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    public void makeMove(String authToken, int gameID, ChessMove move) throws ResponseException {
+        try {
+            websocketCom.makeMove(authToken, gameID, move);
         } catch (IOException e) {
             throw new ResponseException(500, e.getMessage());
         }

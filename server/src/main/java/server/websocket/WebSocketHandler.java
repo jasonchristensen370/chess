@@ -1,8 +1,9 @@
 package server.websocket;
 
-import com.google.gson.Gson;
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import dataaccess.DataAccessException;
-import dataaccess.GameDAO;
 import dataaccess.SQLAuthDAO;
 import dataaccess.SQLGameDAO;
 import model.GameData;
@@ -21,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @WebSocket
 public class WebSocketHandler {
     private final ConcurrentHashMap<Integer, ConnectionManager> connections = new ConcurrentHashMap<>();
-    private final GameDAO gameDAO = new SQLGameDAO();
+    private final SQLGameDAO gameDAO = new SQLGameDAO();
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException {
@@ -41,7 +42,6 @@ public class WebSocketHandler {
             // Serializes and sends the error message
             sendMessage(session.getRemote(), new ErrorMessage("Error: unauthorized"));
         } catch (Exception ex) {
-            ex.printStackTrace();
             sendMessage(session.getRemote(), new ErrorMessage("Error: " + ex.getMessage()));
         }
 
@@ -95,8 +95,48 @@ public class WebSocketHandler {
         }
     }
 
-    private void makeMove(Session session, String username, MakeMoveCommand command) {
+    private void makeMove(Session session, String username, MakeMoveCommand command) throws IOException {
+        int gameID = command.getGameID();
+        try {
+            GameData gameData = gameDAO.getGame(gameID);
+            ChessGame chessGame = gameData.game();
+            ChessMove move = command.getMove();
+            // Update the game
+            chessGame.makeMove(move);
+            // Update the game in the database
+            gameDAO.setGame(gameID, chessGame);
+            // Send LOAD_GAME message to all clients in the game with updated game.
+            connections.get(gameID).broadcast(null, new LoadGameMessage(chessGame));
+            // Send Notification message to all other clients informing them of the move.
+            connections.get(gameID).broadcast(username, moveNotificationMessage(username, move));
+            // Send Notification if move results in check, checkmate, or stalemate.
+            String message = "";
+            if (chessGame.isInCheckmate(chessGame.getTeamTurn())) {
+                message = chessGame.getTeamTurn().toString()+" is in checkmate";
+            } else if (chessGame.isInStalemate(chessGame.getTeamTurn())) {
+                message = chessGame.getTeamTurn().toString()+" is in stalemate";
+            } else if (chessGame.isInCheck(chessGame.getTeamTurn())) {
+                message = chessGame.getTeamTurn().toString()+" is in check";
+            }
+            connections.get(gameID).broadcast(null, new NotificationMessage(message));
 
+        } catch (DataAccessException e) {
+            sendMessage(session.getRemote(), new ErrorMessage("Error accessing data"));
+        } catch (InvalidMoveException e) {
+            sendMessage(session.getRemote(), new ErrorMessage("Error: Invalid Move"));
+        }
+    }
+
+    private NotificationMessage moveNotificationMessage(String username, ChessMove move) {
+        var start = move.getStartPosition();
+        var end = move.getEndPosition();
+        String message;
+        if (move.getPromotionPiece() == null) {
+            message = username+" played "+start+" to "+end;
+        } else {
+            message = username+" played "+start+" to "+end+" -> "+move.getPromotionPiece();
+        }
+        return new NotificationMessage(message);
     }
 
     private void leaveGame(Session session, String username, UserGameCommand command) throws IOException {

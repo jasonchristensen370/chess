@@ -8,6 +8,9 @@ import java.util.Scanner;
 
 import chess.ChessGame;
 import chess.ChessGame.TeamColor;
+import chess.ChessMove;
+import chess.ChessPiece;
+import static chess.ChessPiece.PieceType.*;
 import chess.ChessPosition;
 import exception.ResponseException;
 import model.GameData;
@@ -17,8 +20,7 @@ import websocket.messages.*;
 
 import static ui.EscapeSequences.*;
 
-import static ui.InputChecker.isNotValidMenuInput;
-import static ui.InputChecker.isNotValidStringInput;
+import static ui.InputChecker.*;
 
 // Draws the Menu
 public class Client implements ServerMessageObserver {
@@ -26,7 +28,6 @@ public class Client implements ServerMessageObserver {
     private boolean loggedIn;
     private boolean inGame;
     private boolean observingGame;
-    private boolean playingGame;
     private boolean exit;
     private final PrintStream out;
     private ServerFacade serverFacade;
@@ -40,7 +41,6 @@ public class Client implements ServerMessageObserver {
         loggedIn = false;
         inGame = false;
         observingGame = false;
-        playingGame = false;
         exit = false;
         out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         try {
@@ -129,7 +129,6 @@ public class Client implements ServerMessageObserver {
                 break;
             case "5": // Play Game
                 inGame = true;
-                playingGame = true;
                 playGame();
                 break;
             case "6": // Observe Game
@@ -167,7 +166,7 @@ public class Client implements ServerMessageObserver {
                 leaveGame();
                 break;
             case "4": // Make Move
-
+                makeMove();
                 break;
             case "5": // Resign
                 resign();
@@ -346,7 +345,7 @@ public class Client implements ServerMessageObserver {
         try {
             serverFacade.observeGame(req);
         } catch (ResponseException e) {
-            printError("Failed to Observe the Game");
+            printError("\nFailed to Observe the Game");
         }
 
         // Start Gameplay UI
@@ -359,18 +358,18 @@ public class Client implements ServerMessageObserver {
         try {
             serverFacade.leaveGame(req);
         } catch (ResponseException e) {
-            printError("Failed to Observe the Game");
+            printError("\nFailed to Observe the Game");
         }
         inGame = false;
         observingGame = false;
-        playingGame = false;
         gameData = null;
         teamColor = null;
     }
 
     private void resign() {
         if (observingGame) {
-            printError("\n Observers cannot resign.");
+            printError("\nObservers cannot resign.");
+            return;
         }
         printPrompt("\nAre you sure you want to resign? (y/n)");
         String in = scanner.nextLine();
@@ -382,9 +381,47 @@ public class Client implements ServerMessageObserver {
         try {
             serverFacade.resign(req);
         } catch (ResponseException e) {
-            printError("Failed to Resign");
+            printError("\nFailed to Resign");
         }
     }
+
+    private void makeMove() {
+        if (observingGame) {
+            printError("\nObservers cannot make a move.");
+            return;
+        }
+        printPrompt("\nEnter move (Ex. d7d8->QUEEN)");
+        String input = scanner.nextLine();
+        if (isNotValidMoveInput(input)) {
+            printError("\nPlease Enter Valid Move (Ex. d7d8->QUEEN OR c2c3)");
+            return;
+        }
+        ChessPosition start = parsePosition(input.substring(0,2));
+        ChessPosition end = parsePosition(input.substring(2,4));
+        ChessPiece.PieceType promoPiece = null;
+        if (input.length() > 4) {
+            promoPiece = getPromoPiece(input.substring(4));
+        }
+        ChessMove move = new ChessMove(start, end, promoPiece);
+        try {
+            serverFacade.makeMove(authToken, gameData.gameID(), move);
+        } catch (ResponseException e) {
+            printError("\nFailed to Make Move");
+        }
+    }
+
+    private ChessPiece.PieceType getPromoPiece(String pieceName) {
+        String name = pieceName.toUpperCase();
+        return switch(name) {
+            case "QUEEN" -> QUEEN;
+            case "ROOK" -> ROOK;
+            case "KNIGHT" -> KNIGHT;
+            case "BISHOP" -> BISHOP;
+            default -> null;
+        };
+    }
+
+
 
     @Override
     public void notify(ServerMessage message) {
@@ -401,9 +438,7 @@ public class Client implements ServerMessageObserver {
                                         gameData.blackUsername(),
                                         gameData.gameName(),
                                         loadGameMessage.getGame());
-//                out.println();
                 drawBoard(null);
-//                gameplayMenu();
                 printGameMenu();
                 break;
             case NOTIFICATION:

@@ -1,11 +1,13 @@
 package net;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.ResponseException;
 
 import javax.websocket.*;
 
 import ui.ServerMessageObserver;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.commands.UserGameCommand.*;
 import websocket.messages.ErrorMessage;
@@ -17,18 +19,16 @@ import java.io.IOException;
 import java.net.URI;
 
 public class WebsocketCommunicator extends Endpoint {
-    private final ServerMessageObserver observer;
     private final Gson gson;
-    private Session session;
+    private final Session session;
 
     public WebsocketCommunicator(String url, ServerMessageObserver observer) throws ResponseException {
         try {
-            this.observer = observer;
             gson = new Gson();
             URI socketURI = new URI(url + "/ws");
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-            this.session = (Session) container.connectToServer(this, socketURI);
+            this.session = container.connectToServer(this, socketURI);
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 public void onMessage(String message) {
 //                    System.out.println(message);
@@ -62,6 +62,11 @@ public class WebsocketCommunicator extends Endpoint {
 
     public void resign(String authToken, Integer gameID) throws IOException {
         var message = new UserGameCommand(CommandType.RESIGN, authToken, gameID);
+        this.session.getBasicRemote().sendText(gson.toJson(message));
+    }
+
+    public void makeMove(String authToken, Integer gameID, ChessMove move) throws IOException {
+        var message = new MakeMoveCommand(authToken, gameID, move);
         this.session.getBasicRemote().sendText(gson.toJson(message));
     }
 }
