@@ -396,7 +396,7 @@ public class Client implements ServerMessageObserver {
         ChessPosition end = parsePosition(input.substring(2,4));
         ChessPiece.PieceType promoPiece = null;
         if (input.length() > 4) {
-            promoPiece = getPromoPiece(input.substring(4));
+            promoPiece = getPromoPiece(input.substring(6));
         }
         ChessMove move = new ChessMove(start, end, promoPiece);
         try {
