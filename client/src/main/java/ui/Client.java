@@ -140,10 +140,8 @@ public class Client implements ServerMessageObserver {
     }
 
     private void gameplayMenu() {
-//        drawBoard(null);
         while (inGame) {
             printGameMenu();
-//            out.print("\n[LOGGED IN] >>> ");
             String input = scanner.nextLine();
             if (isNotValidMenuInput(input, 6)) {
                 printError("\nPlease input valid menu option number");
@@ -317,8 +315,6 @@ public class Client implements ServerMessageObserver {
             var req = new JoinGameRequest(authToken, color, gameData.gameID());
             serverFacade.joinGame(req);
             teamColor = color.equalsIgnoreCase("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-
-//            // Start Gameplay UI
             gameplayMenu();
 
         } catch (ResponseException e) {
@@ -421,8 +417,6 @@ public class Client implements ServerMessageObserver {
         };
     }
 
-
-
     @Override
     public void notify(ServerMessage message) {
         ServerMessage.ServerMessageType type = message.getServerMessageType();
@@ -480,10 +474,6 @@ public class Client implements ServerMessageObserver {
         printMenu("\n1. Help\n2. Redraw Chess Board\n3. Leave\n4. Make Move\n5. Resign\n6. Highlight Legal Moves");
     }
 
-    // ////////////////////////// //
-    // / Helper Print Functions / //
-    // ////////////////////////// //
-
     private void printError(String text) {
         out.println(SET_ERROR_TEXT+text+RESET_TEXT);
     }
@@ -506,5 +496,4 @@ public class Client implements ServerMessageObserver {
         out.println();
         ChessBoardGraphics.drawChessBoard(gameData.game(), teamColor, pos);
     }
-
 }
